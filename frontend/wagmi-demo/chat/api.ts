@@ -1,10 +1,11 @@
 const BASE_URL = "http://localhost:5000";
+const VERSION = "v1";
 
 export async function createChat() {
 
-    const resReal = await fetch(BASE_URL + '/about', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' }
+    const resReal = await fetch(`${BASE_URL}/api/${VERSION}/about`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" }
     });
 
     const dataReal = await resReal.json();
@@ -27,9 +28,9 @@ export async function createChat() {
 
 export async function getSafeWallets(address: string) {
     try {
-        const response = await fetch(`${BASE_URL}/api/v1/owners/${address}/safes`, {
-            method: 'GET',
-            headers: { 'Content-Type': 'application/json' }
+        const response = await fetch(`${BASE_URL}/api/${VERSION}/owners/${address}/safes`, {
+            method: "GET",
+            headers: { "Content-Type": "application/json" }
         });
 
         if (!response.ok) {
@@ -40,6 +41,25 @@ export async function getSafeWallets(address: string) {
         return data;
     } catch (error) {
         console.error("Error fetching safe wallets:", error);
+        return Promise.reject(error);
+    }
+}
+
+export async function getPendingTransactions(address: string) {
+    try {
+        const response = await fetch(`${BASE_URL}/api/${VERSION}/tx/${address}/pending`, {
+            method: "GET",
+            headers: { "Content-Type": "application/json" }
+        });
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        return data;
+    } catch (error) {
+        console.error("Error fetching pending transactions:", error);
         return Promise.reject(error);
     }
 }

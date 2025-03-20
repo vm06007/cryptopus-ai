@@ -61,7 +61,7 @@ crypto_assistant = CryptoTradingAssistant()
 def home():
     return 'Hello, World!'
 
-@app.route('/about', methods=['GET', 'POST'])
+@app.route('/api/v1/about', methods=['GET', 'POST'])
 def about():
     if request.method == 'POST':
         return jsonify({"message": "hello"})
