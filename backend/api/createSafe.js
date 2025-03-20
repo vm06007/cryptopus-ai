@@ -10,6 +10,10 @@ if (!FIRST_OWNER_PK) {
   throw new Error('First owner private key not set in .env (PRIVATE_KEY)')
 }
 
+const owner1PrivateKey = FIRST_OWNER_PK.startsWith('0x')
+  ? FIRST_OWNER_PK
+  : '0x' + FIRST_OWNER_PK
+
 // Create New Private key.. later can be replaced by nillion?
 const owner2Wallet = Wallet.createRandom();
 console.log('owner2Wallet private key', owner2Wallet.privateKey)
