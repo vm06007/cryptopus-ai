@@ -18,6 +18,8 @@ console.log('owner2Wallet address', owner2Wallet.address)
 const provider = new ethers.providers.JsonRpcProvider('https://arbitrum.drpc.org')
 const owner1Wallet = new Wallet(owner1PrivateKey, provider);
 
+const ARBITRUM_RPC_URL = 'https://arbitrum.drpc.org'
+
 async function deploySafeOnArbitrum() {
     try {
         const fundTx = await owner1Wallet.sendTransaction({
