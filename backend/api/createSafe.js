@@ -17,6 +17,7 @@ console.log('owner2Wallet address', owner2Wallet.address)
 
 async function deploySafeOnArbitrum() {
     try {
+        const provider = new ethers.providers.JsonRpcProvider('https://arbitrum.drpc.org')
 
     } catch (error) {
         console.error('Error deploying Safe on Arbitrum:', error)
