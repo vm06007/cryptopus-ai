@@ -14,3 +14,14 @@ if (!FIRST_OWNER_PK) {
 const owner2Wallet = Wallet.createRandom();
 console.log('owner2Wallet private key', owner2Wallet.privateKey)
 console.log('owner2Wallet address', owner2Wallet.address)
+
+async function deploySafeOnArbitrum() {
+    try {
+
+    } catch (error) {
+        console.error('Error deploying Safe on Arbitrum:', error)
+        process.exit(1)
+    }
+}
+
+deploySafeOnArbitrum()
