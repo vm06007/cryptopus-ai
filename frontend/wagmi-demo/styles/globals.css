@@ -2,132 +2,139 @@
 @tailwind components;
 @tailwind utilities;
 
-body, html, #root {
-  @apply text-main-text h-full;
+body,
+html,
+#root {
+    @apply text-main-text h-full;
 }
 
 ::-webkit-scrollbar {
-  @apply h-4 w-2;
+    @apply h-4 w-2;
 }
 
 ::-webkit-scrollbar:horizontal {
-  @apply h-4 w-2;
+    @apply h-4 w-2;
 }
 
 ::-webkit-scrollbar-track {
-  @apply bg-transparent rounded;
+    @apply bg-transparent rounded;
 }
 
 ::-webkit-scrollbar-thumb {
-  @apply bg-primary-blue/50 border border-white rounded;
+    @apply bg-primary-blue/50 border border-white rounded;
 }
 
 .spinner-child {
-  @apply absolute -top-1 left-0 h-full w-full content-[''] rounded-full bg-primary-orange opacity-0;
+    @apply absolute -top-1 left-0 h-full w-full content-[''] rounded-full bg-primary-orange opacity-0;
 }
 
 .markdown-container p {
-  @apply mb-5;
+    @apply mb-5;
 }
 
-.markdown-container h1, h2, h3, h4, h5, h6 {
-  @apply font-bold mb-5;
+.markdown-container h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    @apply font-bold mb-5;
 }
 
 .markdown-container li {
-  @apply mb-3;
+    @apply mb-3;
 }
 
 .markdown-container li:last-child {
-  @apply mb-0;
+    @apply mb-0;
 }
 
 .markdown-container ol {
-  @apply list-decimal mx-0 mt-0 mb-5 pl-8;
+    @apply list-decimal mx-0 mt-0 mb-5 pl-8;
 }
 
 .markdown-container ul {
-  @apply list-disc mx-0 mt-0 mb-5 pl-8;
+    @apply list-disc mx-0 mt-0 mb-5 pl-8;
 }
 
-.markdown-container > :last-child {
-  @apply mb-0;
+.markdown-container> :last-child {
+    @apply mb-0;
 }
 
 .full-width button,
 .full-width {
-  width: 100%;
-  margin-bottom: 2px;
+    width: 100%;
+    margin-bottom: 2px;
 }
 
 .sticky {
-  position: sticky;
-  top: 0px;
-  padding: 5px;
+    position: sticky;
+    top: 0px;
+    padding: 5px;
 }
 
 .flexer {
-  display: flex !important;
-  width: 100%;
+    display: flex !important;
+    width: 100%;
 }
 
 .no-bg {
-  background: none !important;
+    background: none !important;
 }
 
 .vh-100 {
-  background-color: #00000123 !important;
-  backdrop-filter: blur(7px);
-  margin: 0px;
-  min-height: calc(100vh - 20px);
-  margin: 10px;
-  border-width: 0px !important;
-  border-radius: 20px !important;
-  height: auto;
+    background-color: #00000123 !important;
+    backdrop-filter: blur(7px);
+    margin: 0px;
+    min-height: calc(100vh - 20px);
+    margin: 10px;
+    border-width: 0px !important;
+    border-radius: 20px !important;
+    height: auto;
 }
 
 .trifecta-bg {
-  background-size: cover;
-  background-position: top;
-  padding: 0px !important;
-  margin: 0px !important;
-  background-image: url(https://ethglobal.storage/events/trifecta/images/ftv4p/default.svg) !important;
+    background-size: cover;
+    background-position: top;
+    padding: 0px !important;
+    margin: 0px !important;
+    background-image: url(https://ethglobal.storage/events/trifecta/images/ftv4p/default.svg) !important;
 }
 
 .bg-mamo {
-  background-color: #fbf7f4 !important;
+    background-color: #fbf7f4 !important;
 }
 
 .mode-selector {
-  background: none;
-  background-color: transparent !important;
-  backdrop-filter: blur(10px);
-  padding: 10px;
-  border-radius: 50px;
-  margin-top: -5px;
-  padding-top: 10px !important;
+    background: none;
+    background-color: transparent !important;
+    backdrop-filter: blur(10px);
+    padding: 10px;
+    border-radius: 50px;
+    margin-top: -5px;
+    padding-top: 10px !important;
 }
 
-.mode-selector > div {
-  cursor: pointer
+.mode-selector>div {
+    cursor: pointer
 }
 
-.mode-selector > div:hover {
-  background-color: #0000001a;
+.mode-selector>div:hover {
+    background-color: #0000001a;
 }
 
 .flexing {
-  display: flex !important;
-  flex-direction: row !important;
-  gap: 10px !important;
+    display: flex !important;
+    flex-direction: row !important;
+    gap: 10px !important;
 }
 
 .super {
-  transform: scale(1.04);
-  margin-top: 10px;
+    transform: scale(1.04);
+    margin-top: 10px;
 }
 
 .inline {
-  display: inline-block;
-  white-space: nowrap;
+    display: inline-block;
+    white-space: nowrap;
 }
