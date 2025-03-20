@@ -53,3 +53,81 @@ body, html, #root {
 .markdown-container > :last-child {
   @apply mb-0;
 }
+
+.full-width button,
+.full-width {
+  width: 100%;
+  margin-bottom: 2px;
+}
+
+.sticky {
+  position: sticky;
+  top: 0px;
+  padding: 5px;
+}
+
+.flexer {
+  display: flex !important;
+  width: 100%;
+}
+
+.no-bg {
+  background: none !important;
+}
+
+.vh-100 {
+  background-color: #00000123 !important;
+  backdrop-filter: blur(7px);
+  margin: 0px;
+  min-height: calc(100vh - 20px);
+  margin: 10px;
+  border-width: 0px !important;
+  border-radius: 20px !important;
+  height: auto;
+}
+
+.trifecta-bg {
+  background-size: cover;
+  background-position: top;
+  padding: 0px !important;
+  margin: 0px !important;
+  background-image: url(https://ethglobal.storage/events/trifecta/images/ftv4p/default.svg) !important;
+}
+
+.bg-mamo {
+  background-color: #fbf7f4 !important;
+}
+
+.mode-selector {
+  background: none;
+  background-color: transparent !important;
+  backdrop-filter: blur(10px);
+  padding: 10px;
+  border-radius: 50px;
+  margin-top: -5px;
+  padding-top: 10px !important;
+}
+
+.mode-selector > div {
+  cursor: pointer
+}
+
+.mode-selector > div:hover {
+  background-color: #0000001a;
+}
+
+.flexing {
+  display: flex !important;
+  flex-direction: row !important;
+  gap: 10px !important;
+}
+
+.super {
+  transform: scale(1.04);
+  margin-top: 10px;
+}
+
+.inline {
+  display: inline-block;
+  white-space: nowrap;
+}
