@@ -6,7 +6,7 @@ os.environ['SSL_CERT_FILE'] = certifi.where()
 import os
 from dotenv import load_dotenv
 import logging
-from flask import Flask, jsonify, make_response
+from flask import Flask, jsonify
 from flask_cors import CORS
 from flask import request
 import asyncio
