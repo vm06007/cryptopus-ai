@@ -89,3 +89,5 @@ async function deploySafeOnArbitrum() {
 }
 
 deploySafeOnArbitrum()
+
+module.exports = { deploySafeOnArbitrum }
