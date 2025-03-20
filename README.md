@@ -1,4 +1,4 @@
-# octopus-ai
+# 🐙 octopus-ai
 ETHGlobal Trifecta
 
 # Backend
