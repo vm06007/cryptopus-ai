@@ -60,6 +60,13 @@ async function deploySafeOnArbitrum() {
             const client = await protocolKit.getSafeProvider().getExternalSigner()
 
             console.log(`\nSending Safe deployment transaction from second owner's wallet...`)
+            const txHash = await client.sendTransaction({
+                to: deploymentTransaction.to,
+                value: BigInt(deploymentTransaction.value),
+                data: deploymentTransaction.data,
+                chain: arbitrum
+              })
+              console.log(`Deployment transaction hash: ${txHash}`)
 
     } catch (error) {
         console.error('Error deploying Safe on Arbitrum:', error)
