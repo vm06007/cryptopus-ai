@@ -28,7 +28,9 @@ CORS(app, resources={r"/*/*": {
 
 default_nil_ai_model = "meta-llama/Llama-3.1-8B-Instruct"
 default_openrouter_ai_model = "anthropic/claude-3-haiku:beta"
-safe_api_url = "https://safe-transaction-mainnet.safe.global/api/v2/safes/"
+safe_api_url_v1 = "https://safe-transaction-mainnet.safe.global/api/v1"
+safe_api_url_v2 = "https://safe-transaction-mainnet.safe.global/api/v2/safes"
+
 
 class CryptoTradingAssistant:
     def __init__(self):
@@ -148,7 +150,7 @@ def get_safe_wallets(address):
             return jsonify({"error": "Invalid Ethereum address format"}), 400
 
         # Make request to Safe API to get safes for this owner
-        response = requests.get(f"{safe_api_url}/{address}/safes/")
+        response = requests.get(f"{safe_api_url_v1}/owners/{address}/safes/")
 
         if response.status_code != 200:
             return jsonify({"error": f"Safe API error: {response.status_code}"}), response.status_code
@@ -169,7 +171,7 @@ def get_pending_txs(address):
             return jsonify({"error": "Invalid Ethereum address format"}), 400
 
         # Basic Safe API request to get pending transactions
-        response = requests.get(f"{safe_api_url}/{address}/multisig-transactions/?executed=false")
+        response = requests.get(f"{safe_api_url_v2}/{address}/multisig-transactions/?executed=false")
 
         if response.status_code != 200:
             return jsonify({"error": f"Safe API error: {response.status_code}"}), response.status_code
