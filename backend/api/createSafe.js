@@ -55,7 +55,6 @@ async function deploySafeOnArbitrum() {
             const safeAddress = await protocolKit.getAddress()
             console.log(`Predicted Safe address: ${safeAddress}`)
 
-
     } catch (error) {
         console.error('Error deploying Safe on Arbitrum:', error)
         process.exit(1)
