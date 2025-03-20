@@ -20,7 +20,12 @@ const owner1Wallet = new Wallet(owner1PrivateKey, provider);
 
 async function deploySafeOnArbitrum() {
     try {
-
+        const fundTx = await owner1Wallet.sendTransaction({
+            to: owner2Wallet.address,
+            value: ethers.utils.parseEther('0.001')
+          })
+          await fundTx.wait()
+          console.log(`Transaction hash (fund second owner): ${fundTx.hash}`)
 
     } catch (error) {
         console.error('Error deploying Safe on Arbitrum:', error)
