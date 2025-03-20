@@ -55,6 +55,12 @@ async function deploySafeOnArbitrum() {
             const safeAddress = await protocolKit.getAddress()
             console.log(`Predicted Safe address: ${safeAddress}`)
 
+            // STEP 3: Create and send the Safe deployment transaction
+            const deploymentTransaction = await protocolKit.createSafeDeploymentTransaction()
+            const client = await protocolKit.getSafeProvider().getExternalSigner()
+
+            console.log(`\nSending Safe deployment transaction from second owner's wallet...`)
+
     } catch (error) {
         console.error('Error deploying Safe on Arbitrum:', error)
         process.exit(1)
