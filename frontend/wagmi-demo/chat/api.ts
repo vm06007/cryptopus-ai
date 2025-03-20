@@ -26,6 +26,45 @@ export async function createChat() {
     return data;
 }
 
+export async function sendChatMessage(chatId: number, message: string, mode: string) {
+
+    console.log("chatId:", chatId);
+    console.log("Sending message:", message);
+
+    if (!mode) {
+        mode = "ask_openrouter";
+    }
+    const resReal = await fetch(`http://localhost:5000/${mode}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+            question: message,
+            model: "anthropic/claude-3-haiku:beta"
+        })
+    });
+
+    const dataReadl = await resReal.json();
+    const reply = dataReadl.response;
+
+    const chunks = reply.split('\n');
+    const messages = chunks.map((line: string, i: number) => ({
+        type: 'event',
+        data: i < chunks.length - 1 ? line + '\n' : line
+    }));
+
+    const res = {
+        ok: true,
+        status: 200,
+        json: async () => ({ messages })
+    };
+
+    if (!res.ok) {
+        return Promise.reject({ status: res.status, data: await res.json() });
+    }
+
+    return res.json();
+}
+
 export async function getSafeWallets(address: string) {
     try {
         const response = await fetch(`${BASE_URL}/api/${VERSION}/owners/${address}/safes`, {

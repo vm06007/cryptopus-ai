@@ -2,7 +2,7 @@ import os
 import certifi
 import requests
 
-os.environ['SSL_CERT_FILE'] = certifi.where()
+os.environ["SSL_CERT_FILE"] = certifi.where()
 import os
 from dotenv import load_dotenv
 import logging
@@ -82,33 +82,33 @@ crypto_assistant = CryptoTradingAssistant()
 
 @app.route("/")
 def home():
-    return 'Hello, World!'
+    return "Hello, World!"
 
-@app.route('/api/v1/about', methods=['GET', 'POST'])
+@app.route("/api/v1/about", methods=["GET", "POST"])
 def about():
-    if request.method == 'POST':
+    if request.method == "POST":
         return jsonify({"message": "hello"})
     else:
         # handle GET
-        return 'About'
+        return "About"
 
-@app.route('/ask_nilai/<path:question>', methods=['GET'])
+@app.route("/ask_nilai/<path:question>", methods=["GET"])
 def ask_nilai_get(question):
-    model = request.args.get('model', default_nil_ai_model)
+    model = request.args.get("model", default_nil_ai_model)
     if not question:
         return jsonify({"error": "Question is empty"}), 400
 
     response = asyncio.run(crypto_assistant.ask_nilai(question, model))
     return jsonify({"response": response})
 
-@app.route('/ask_nilai', methods=['POST', 'OPTIONS'])
+@app.route("/ask_nilai", methods=["POST", "OPTIONS"])
 def ask_nilai_post():
-    if request.method == 'OPTIONS':
-        return '', 200
+    if request.method == "OPTIONS":
+        return "", 200
 
     data = request.get_json() or {}
-    question = data.get('question', default_nil_ai_model)
-    model = data.get('model', '')
+    question = data.get("question", default_nil_ai_model)
+    model = data.get("model", "")
 
     if not question:
         return jsonify({"error": "Question is empty"}), 400
@@ -116,23 +116,23 @@ def ask_nilai_post():
     response = asyncio.run(crypto_assistant.ask_nilai(question, model))
     return jsonify({"response": response})
 
-@app.route('/ask_openrouter/<path:question>', methods=['GET'])
+@app.route("/ask_openrouter/<path:question>", methods=["GET"])
 def ask_open_router_get(question):
-    model = request.args.get('model', default_openrouter_ai_model)
+    model = request.args.get("model", default_openrouter_ai_model)
     if not question:
         return jsonify({"error": "Question is empty"}), 400
 
     response = asyncio.run(crypto_assistant.ask_openrouter(question, model))
     return jsonify({"response": response})
 
-@app.route('/ask_openrouter', methods=['POST', 'OPTIONS'])
+@app.route("/ask_openrouter", methods=["POST", "OPTIONS"])
 def ask_open_router_post():
-    if request.method == 'OPTIONS':
-        return '', 200
+    if request.method == "OPTIONS":
+        return "", 200
 
     data = request.get_json() or {}
-    question = data.get('question', default_openrouter_ai_model)
-    model = data.get('model', '')
+    question = data.get("question", default_openrouter_ai_model)
+    model = data.get("model", "")
 
     if not question:
         return jsonify({"error": "Question is empty"}), 400
@@ -140,7 +140,7 @@ def ask_open_router_post():
     response = asyncio.run(crypto_assistant.ask_openrouter(question, model))
     return jsonify({"response": response})
 
-@app.route('/api/v1/owners/<address>/safes', methods=['GET'])
+@app.route("/api/v1/owners/<address>/safes", methods=["GET"])
 def get_safe_wallets(address):
     try:
         # Validate the Ethereum address format
@@ -161,7 +161,7 @@ def get_safe_wallets(address):
         logging.error(f"Error getting Safe wallets for {address}: {str(e)}")
         return jsonify({"error": "Failed to retrieve Safe wallets"}), 500
 
-@app.route('/api/v1/tx/<address>/pending', methods=['GET'])
+@app.route("/api/v1/tx/<address>/pending", methods=["GET"])
 def get_pending_txs(address):
     try:
         # Validate the Ethereum address format
