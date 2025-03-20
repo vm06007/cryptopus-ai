@@ -15,9 +15,11 @@ const owner2Wallet = Wallet.createRandom();
 console.log('owner2Wallet private key', owner2Wallet.privateKey)
 console.log('owner2Wallet address', owner2Wallet.address)
 
+const provider = new ethers.providers.JsonRpcProvider('https://arbitrum.drpc.org')
+
 async function deploySafeOnArbitrum() {
     try {
-        const provider = new ethers.providers.JsonRpcProvider('https://arbitrum.drpc.org')
+
 
     } catch (error) {
         console.error('Error deploying Safe on Arbitrum:', error)
