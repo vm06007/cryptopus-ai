@@ -46,7 +46,7 @@ async function deploySafeOnArbitrum() {
 
         // Pass the second owner's private key to Safe.init
             const protocolKit = await Safe.init({
-            provider: 'https://arbitrum.drpc.org',
+            provider: ARBITRUM_RPC_URL,
             signer: owner2Wallet.privateKey,
             predictedSafe
             })
