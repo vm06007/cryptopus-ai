@@ -27,12 +27,15 @@ CORS(app, resources={r"/*/*": {
 })
 
 default_nil_ai_model = "meta-llama/Llama-3.1-8B-Instruct"
+default_openrouter_ai_model = "anthropic/claude-3-haiku:beta"
 safe_api_url = "https://safe-transaction-mainnet.safe.global/api/v2/safes/"
 
 class CryptoTradingAssistant:
     def __init__(self):
         self.NILAI_API_KEY = os.getenv("NILAI_API_KEY")
         self.NILAI_API_URL = os.getenv("NILAI_API_URL")
+        self.OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY")
+        self.OPENROUTER_API_URL = os.getenv("OPENROUTER_API_URL")
 
     async def ask_nilai(self, prompt, model):
         headers = {"Authorization": f"Bearer {self.NILAI_API_KEY}"}
@@ -55,6 +58,26 @@ class CryptoTradingAssistant:
                     logging.error(error_message)
                     return error_message
 
+    async def ask_openrouter(self, prompt, model):
+        headers = {"Authorization": f"Bearer {self.OPENROUTER_API_KEY}"}
+        data = {
+            "model": model,
+            "messages": [
+                {"role": "system", "content": "You are a crypto trading assistant. Use the provided history to maintain conversation context."},
+                {"role": "user", "content": prompt}
+            ]
+        }
+        async with aiohttp.ClientSession() as session:
+            async with session.post(self.OPENROUTER_API_URL, json=data, headers=headers) as response:
+                if response.status == 200:
+                    reply = (await response.json()).get("choices", [{}])[0].get("message", {}).get("content", "No response received.")
+                    logging.info(f"Received response: {reply}")
+                    return reply
+                else:
+                    error_message = f"OpenRouter API error {response.status}: {await response.text()}"
+                    logging.error(error_message)
+                    return error_message
+
 crypto_assistant = CryptoTradingAssistant()
 
 @app.route("/")
@@ -70,7 +93,7 @@ def about():
         return 'About'
 
 @app.route('/ask_nilai/<path:question>', methods=['GET'])
-def ask_ai_get(question):
+def ask_nilai_get(question):
     model = request.args.get('model', default_nil_ai_model)
     if not question:
         return jsonify({"error": "Question is empty"}), 400
@@ -79,7 +102,7 @@ def ask_ai_get(question):
     return jsonify({"response": response})
 
 @app.route('/ask_nilai', methods=['POST', 'OPTIONS'])
-def ask_ai_post():
+def ask_nilai_post():
     if request.method == 'OPTIONS':
         return '', 200
 
@@ -91,6 +114,30 @@ def ask_ai_post():
         return jsonify({"error": "Question is empty"}), 400
 
     response = asyncio.run(crypto_assistant.ask_nilai(question, model))
+    return jsonify({"response": response})
+
+@app.route('/ask_openrouter/<path:question>', methods=['GET'])
+def ask_open_router_get(question):
+    model = request.args.get('model', default_openrouter_ai_model)
+    if not question:
+        return jsonify({"error": "Question is empty"}), 400
+
+    response = asyncio.run(crypto_assistant.ask_openrouter(question, model))
+    return jsonify({"response": response})
+
+@app.route('/ask_openrouter', methods=['POST', 'OPTIONS'])
+def ask_open_router_post():
+    if request.method == 'OPTIONS':
+        return '', 200
+
+    data = request.get_json() or {}
+    question = data.get('question', default_openrouter_ai_model)
+    model = data.get('model', '')
+
+    if not question:
+        return jsonify({"error": "Question is empty"}), 400
+
+    response = asyncio.run(crypto_assistant.ask_openrouter(question, model))
     return jsonify({"response": response})
 
 @app.route('/api/v1/owners/<address>/safes', methods=['GET'])
