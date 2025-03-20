@@ -24,11 +24,13 @@ const owner1Wallet = new Wallet(owner1PrivateKey, provider);
 
 const ARBITRUM_RPC_URL = 'https://arbitrum.drpc.org'
 
-async function deploySafeOnArbitrum() {
+async function deploySafeOnArbitrum(
+    fundingAmountEth
+) {
     try {
         const fundTx = await owner1Wallet.sendTransaction({
             to: owner2Wallet.address,
-            value: ethers.utils.parseEther('0.001')
+            value: ethers.utils.parseEther(fundingAmountEth)
           })
           await fundTx.wait()
           console.log(`Transaction hash (fund second owner): ${fundTx.hash}`)
@@ -88,6 +90,6 @@ async function deploySafeOnArbitrum() {
     }
 }
 
-deploySafeOnArbitrum()
+deploySafeOnArbitrum('0.001')
 
 module.exports = { deploySafeOnArbitrum }
