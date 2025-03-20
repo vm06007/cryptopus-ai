@@ -72,6 +72,16 @@ async function deploySafeOnArbitrum() {
               })
               console.log(`Deployment transaction hash: ${txHash}`)
 
+              console.log(`Safe deployed at: ${safeAddress}`)
+
+              // STEP 4: Verify the Safe is actually deployed
+              const newProtocolKit = await protocolKit.connect({ safeAddress })
+              const isSafeDeployed = await newProtocolKit.isSafeDeployed()
+              console.log(`Is the new Safe actually deployed? ${isSafeDeployed}`)
+
+              return safeAddress
+
+
     } catch (error) {
         console.error('Error deploying Safe on Arbitrum:', error)
         process.exit(1)
