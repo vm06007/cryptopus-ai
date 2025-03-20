@@ -5,7 +5,7 @@ import { parseSSEStream } from "../utils";
 import ChatMessages from "../components/ChatMessages";
 import ChatInput from "../components/ChatInput";
 
-function Chatbot() {
+function Chatbot({ chatMode }) {
     const [chatId, setChatId] = useState(null);
     const [messages, setMessages] = useImmer([]);
     const [newMessage, setNewMessage] = useState("");
@@ -28,14 +28,24 @@ function Chatbot() {
         // console.log(chatId, "chatId");
 
         try {
+            if (!chatId) {
+                const { id } = await createChat();
+                console.log("Chat ID:", id);
+                setChatId(id);
+                chatIdOrNew = id;
+            }
+
+            if (!chatMode) {
+                chatMode = "ask_ai";
+            }
 
             const jsonResponse = await sendChatMessage(
                 chatIdOrNew,
                 trimmedMessage,
-                "ask_openrouter"
+                chatMode
             );
 
-            for await (const textChunk of parseSSEStream(jsonResponse, 500, 100)) {
+            for await (const textChunk of parseSSEStream(jsonResponse, 1000, 100)) {
                 setMessages(draft => {
                     draft[draft.length - 1].content += textChunk;
                 });
