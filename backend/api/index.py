@@ -22,6 +22,8 @@ CORS(app, resources={r"/*/*": {
     ]}
 })
 
+default_nil_ai_model = "meta-llama/Llama-3.1-8B-Instruct"
+
 class CryptoTradingAssistant:
     def __init__(self):
         self.NILAI_API_KEY = os.getenv("NILAI_API_KEY")
@@ -62,15 +64,28 @@ def about():
         # handle GET
         return 'About'
 
-@app.route('/ask_ai/<path:question>', methods=['GET'])
+@app.route('/ask_nilai/<path:question>', methods=['GET'])
 def ask_ai_get(question):
-    model = request.args.get('model', 'meta-llama/Llama-3.1-8B-Instruct')
+    model = request.args.get('model', default_nil_ai_model)
     if not question:
         return jsonify({"error": "Question is empty"}), 400
 
     response = asyncio.run(crypto_assistant.ask_nilai(question, model))
+    return jsonify({"response": response})
 
-    # Return as HTML or JSON—your choice. Example in JSON:
+@app.route('/ask_nilai', methods=['POST', 'OPTIONS'])
+def ask_ai_post():
+    if request.method == 'OPTIONS':
+        return '', 200
+
+    data = request.get_json() or {}
+    question = data.get('question', default_nil_ai_model)
+    model = data.get('model', '')
+
+    if not question:
+        return jsonify({"error": "Question is empty"}), 400
+
+    response = asyncio.run(crypto_assistant.ask_nilai(question, model))
     return jsonify({"response": response})
 
 if __name__ == "__main__":
