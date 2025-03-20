@@ -3,6 +3,9 @@
 import Button from 'components/Button';
 import Balance from 'components/Balance';
 
+import { useState, useEffect } from 'react';
+import Chatbot from 'chat/components/Chatbot';
+
 /*import BlockNumber from 'components/BlockNumber';
 import ContractEvent from 'components/ContractEvent';
 import ContractRead from 'components/ContractRead';
@@ -48,6 +51,8 @@ export default function Home() {
     const { address, isConnected, isConnecting, isDisconnected } = useAccount();
     const { disconnect } = useDisconnect();
     const { setActiveWallet } = useSetActiveWallet();
+
+    const [currentMode, setCurrentMode] = useState('ask_openrouter');
 
     if (!ready) {
         return null;
@@ -134,6 +139,7 @@ export default function Home() {
                             </>
                         )}
                     </div>
+                    <Chatbot chatMode={currentMode} />
                     <div className="border-1 flex flex-col items-start gap-2 rounded border border-black bg-slate-100 p-3">
                         <h1 className="text-4xl font-bold">WAGMI</h1>
                         <p>
