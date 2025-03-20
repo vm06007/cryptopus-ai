@@ -27,6 +27,7 @@ CORS(app, resources={r"/*/*": {
 })
 
 default_nil_ai_model = "meta-llama/Llama-3.1-8B-Instruct"
+safe_api_url = "https://safe-transaction-mainnet.safe.global/api/v2/safes/"
 
 class CryptoTradingAssistant:
     def __init__(self):
@@ -99,9 +100,6 @@ def get_safe_wallets(address):
         if not Web3.is_address(address):
             return jsonify({"error": "Invalid Ethereum address format"}), 400
 
-        # Hard-coded URL for the Safe Transaction Service API
-        safe_api_url = "https://safe-transaction-mainnet.safe.global/api/v1/owners"
-
         # Make request to Safe API to get safes for this owner
         response = requests.get(f"{safe_api_url}/{address}/safes/")
 
@@ -116,7 +114,26 @@ def get_safe_wallets(address):
         logging.error(f"Error getting Safe wallets for {address}: {str(e)}")
         return jsonify({"error": "Failed to retrieve Safe wallets"}), 500
 
-    # Enjoy Vibe Coding
+@app.route('/api/v1/tx/<address>/pending', methods=['GET'])
+def get_pending_txs(address):
+    try:
+        # Validate the Ethereum address format
+        if not Web3.is_address(address):
+            return jsonify({"error": "Invalid Ethereum address format"}), 400
+
+        # Basic Safe API request to get pending transactions
+        response = requests.get(f"{safe_api_url}/{address}/multisig-transactions/?executed=false")
+
+        if response.status_code != 200:
+            return jsonify({"error": f"Safe API error: {response.status_code}"}), response.status_code
+
+        # Return the transaction wallets data
+        return jsonify(response.json())
+
+    # Error handling
+    except Exception as e:
+        logging.error(f"Error getting transactions for {address}: {str(e)}")
+        return jsonify({"error": "Failed to retrieve transactions"}), 500
 
 if __name__ == "__main__":
     app.run()
