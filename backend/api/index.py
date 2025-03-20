@@ -1,5 +1,7 @@
 import os
 import certifi
+import requests
+
 os.environ['SSL_CERT_FILE'] = certifi.where()
 import os
 from dotenv import load_dotenv
@@ -9,6 +11,8 @@ from flask_cors import CORS
 from flask import request
 import asyncio
 import aiohttp
+
+from web3 import Web3
 
 load_dotenv()
 
@@ -87,6 +91,32 @@ def ask_ai_post():
 
     response = asyncio.run(crypto_assistant.ask_nilai(question, model))
     return jsonify({"response": response})
+
+@app.route('/api/v1/owners/<address>/safes', methods=['GET'])
+def get_safe_wallets(address):
+    try:
+        # Validate the Ethereum address format
+        if not Web3.is_address(address):
+            return jsonify({"error": "Invalid Ethereum address format"}), 400
+
+        # Hard-coded URL for the Safe Transaction Service API
+        safe_api_url = "https://safe-transaction-mainnet.safe.global/api/v1/owners"
+
+        # Make request to Safe API to get safes for this owner
+        response = requests.get(f"{safe_api_url}/{address}/safes/")
+
+        if response.status_code != 200:
+            return jsonify({"error": f"Safe API error: {response.status_code}"}), response.status_code
+
+        # Return the safe wallets data
+        return jsonify(response.json())
+
+    # Error handling
+    except Exception as e:
+        logging.error(f"Error getting Safe wallets for {address}: {str(e)}")
+        return jsonify({"error": "Failed to retrieve Safe wallets"}), 500
+
+    # Enjoy Vibe Coding
 
 if __name__ == "__main__":
     app.run()
