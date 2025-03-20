@@ -1,0 +1,5 @@
+Flask==2.2.5
+Flask-Cors==3.0.10
+certifi==2024.2.2
+setuptools
+python-dotenv==0.21.1
