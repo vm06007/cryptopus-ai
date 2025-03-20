@@ -40,6 +40,20 @@ async function deploySafeOnArbitrum() {
           }
 
 
+            console.log(`\nInitializing Safe SDK with second owner's wallet...`)
+
+        // Pass the second owner's private key to Safe.init
+            const protocolKit = await Safe.init({
+            provider: 'https://arbitrum.drpc.org',
+            signer: owner2Wallet.privateKey,
+            predictedSafe
+            })
+
+            // Check the predicted safe address
+            const safeAddress = await protocolKit.getAddress()
+            console.log(`Predicted Safe address: ${safeAddress}`)
+
+
     } catch (error) {
         console.error('Error deploying Safe on Arbitrum:', error)
         process.exit(1)
