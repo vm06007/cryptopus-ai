@@ -1,8 +1,9 @@
 'use client';
 
-import Balance from 'components/Balance';
-import BlockNumber from 'components/BlockNumber';
 import Button from 'components/Button';
+import Balance from 'components/Balance';
+
+/*import BlockNumber from 'components/BlockNumber';
 import ContractEvent from 'components/ContractEvent';
 import ContractRead from 'components/ContractRead';
 import ContractReads from 'components/ContractReads';
@@ -23,14 +24,16 @@ import Transaction from 'components/Transaction';
 import WaitForTransaction from 'components/WaitForTransaction';
 import WalletClient from 'components/WalletClient';
 import WatchPendingTransactions from 'components/WatchPendingTransactions';
+*/
+
 import { shorten } from 'lib/utils';
-import Image from 'next/image';
+// import Image from 'next/image';
 import { useAccount, useDisconnect } from 'wagmi';
 
 import { usePrivy, useWallets } from '@privy-io/react-auth';
 import { useSetActiveWallet } from '@privy-io/wagmi';
 
-import wagmiPrivyLogo from '../../public/wagmi_privy_logo.png';
+// import wagmiPrivyLogo from '../../public/wagmi_privy_logo.png';
 
 const MonoLabel = ({ label }: { label: string }) => {
     return <span className="rounded-xl bg-slate-200 px-2 py-1 font-mono">{label}</span>;
@@ -53,14 +56,7 @@ export default function Home() {
     return (
         <>
             <main className="min-h-screen bg-slate-200 p-4 text-slate-800">
-                <Image
-                    className="mx-auto rounded-lg"
-                    src={wagmiPrivyLogo}
-                    alt="wagmi x privy logo"
-                    width={400}
-                    height={100}
-                />
-                <p className="my-4 text-center">
+                {/*<p className="my-4 text-center">
                     This demo showcases how you can integrate{' '}
                     <a href="https://wagmi.sh/" className="font-medium underline">
                         wagmi
@@ -80,7 +76,7 @@ export default function Home() {
                         source code
                     </a>{' '}
                     for this app.
-                </p>
+                </p>*/}
                 <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
                     <div className="border-1 flex flex-col items-start gap-2 rounded border border-black bg-slate-100 p-3">
                         <h1 className="text-4xl font-bold">Privy</h1>
@@ -153,28 +149,6 @@ export default function Home() {
                                 </p>
 
                                 <Balance />
-                                <Signer />
-                                <SignMessage />
-                                <SignTypedData />
-                                <PublicClient />
-                                <EnsName />
-                                <EnsAddress />
-                                <EnsAvatar />
-                                <EnsResolver />
-                                <SwitchNetwork />
-                                <BlockNumber />
-                                <SendTransaction />
-                                <ContractRead />
-                                <ContractReads />
-                                <ContractWrite />
-                                <ContractEvent />
-                                <FeeData />
-                                <Token />
-                                <Transaction />
-                                <WatchPendingTransactions />
-                                <WalletClient />
-                                <WaitForTransaction />
-
                                 <h2 className="mt-6 text-2xl">useDisconnect</h2>
                                 <Button onClick_={disconnect} cta="Disconnect from WAGMI" />
                             </>
