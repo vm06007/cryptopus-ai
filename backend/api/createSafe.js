@@ -27,6 +27,19 @@ async function deploySafeOnArbitrum() {
           await fundTx.wait()
           console.log(`Transaction hash (fund second owner): ${fundTx.hash}`)
 
+          const safeAccountConfig = {
+            owners: [
+              owner1Wallet.address,      // first owner
+              owner2Wallet.address       // second owner
+            ],
+            threshold: 2                // 2-of-2 signatures required
+          }
+
+          const predictedSafe = {
+            safeAccountConfig
+          }
+
+
     } catch (error) {
         console.error('Error deploying Safe on Arbitrum:', error)
         process.exit(1)
