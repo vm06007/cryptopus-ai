@@ -400,7 +400,7 @@ const QueuePanel = ({ safeAddress }: { safeAddress: string }) => {
                                     )}
                                 </div>
                                 <div className="mt-2 flex gap-1">
-                                    <Button cta="Explain Transaction" onClick_={() => console.log("Explaining transaction", tx.safeTxHash)} />
+                                    <Button cta="Examine Transaction" onClick_={() => console.log("Explaining transaction", tx.safeTxHash)} />
                                     {tx.confirmations.length < tx.confirmationsRequired ? (
                                         <Button cta="Confirm Transaction" onClick_={() => console.log("Signing transaction", tx.safeTxHash)} />
                                     ) : (

@@ -140,5 +140,5 @@ h6 {
 }
 
 .overflow-no {
-    overflow-x: hidden;
+    overflow-x: auto;
 }
