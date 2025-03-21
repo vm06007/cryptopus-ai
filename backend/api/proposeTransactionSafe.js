@@ -11,4 +11,4 @@ const rawArgs = minimist(process.argv.slice(2), {
       'nonce',
       'value'
     ]
-  });
+  });const PrivateKeyWallet = new ethers.Wallet(process.env.PRIVATE_KEY, process.env.RPC_URL);
