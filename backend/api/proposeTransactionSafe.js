@@ -31,3 +31,15 @@ const {
   nonce
 } = rawArgs;
 
+if (!safeAddress || !privateKey || !destination || value === undefined) {
+  console.error(
+    'Missing required arguments.\n\nUsage:\n' +
+    '  --safeAddress <address>\n' +
+    '  --destination <address>\n' +
+    '  --value <wei>\n' +
+    '  [--data <hex string> (optional)]\n' +
+    '  [--nonce <uint> (optional)]\n\n' +
+    'Also ensure PRIVATE_KEY is set in your .env file.'
+  );
+  process.exit(1);
+}
