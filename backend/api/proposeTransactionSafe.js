@@ -153,6 +153,7 @@ async () => {
   console.log('Proposing TX to Safe Service with payload:', payload);
 
   try {
+    const postUrl = `https://safe-transaction-arbitrum.safe.global/api/v2/safes/${safeAddress}/multisig-transactions/`;
   } catch (err) {
   }
 })
