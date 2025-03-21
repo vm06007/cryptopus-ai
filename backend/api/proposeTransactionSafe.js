@@ -48,3 +48,16 @@ if (!safeAddress || !privateKey || !destination || value === undefined) {
 const valueStr    = value.toString();
 const gasPriceStr = gasPrice.toString();
 let txNonce       = nonce;
+
+console.log('Final resolved args:', {
+  safeAddress,
+  destination,
+  value: valueStr,
+  data,
+  safeTxGas: safeTxGasStr,
+  baseGas: baseGasStr,
+  gasPrice: gasPriceStr,
+  gasToken,
+  refundReceiver,
+  nonce: txNonce
+});
