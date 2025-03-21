@@ -196,14 +196,14 @@ const QueuePanel = ({ safeAddress }: { safeAddress: string }) => {
     };
 
     // Convert WEI to ETH with proper formatting
-    const weiToEth = (weiValue) => {
+    const weiToEth = (weiValue: any) => {
         if (!weiValue) return "0 ETH";
         const ethValue = parseFloat(weiValue) / 1e18;
         return `${ethValue.toFixed(ethValue < 0.0001 ? 8 : 4)} ETH`;
     };
 
     // Format token value based on decimals
-    const formatTokenValue = (value, decimals) => {
+    const formatTokenValue = (value: any, decimals: number) => {
         if (!value) return "0";
         const formattedValue = parseFloat(value) / Math.pow(10, decimals);
         return formattedValue.toLocaleString(undefined, {
@@ -212,7 +212,7 @@ const QueuePanel = ({ safeAddress }: { safeAddress: string }) => {
     };
 
     // Get transaction type and description based on data
-    const getTransactionInfo = (tx) => {
+    const getTransactionInfo = (tx: any) => {
         // Default transaction info
         let txInfo = {
             type: "Transaction",
@@ -232,21 +232,22 @@ const QueuePanel = ({ safeAddress }: { safeAddress: string }) => {
             const { method, parameters } = tx.dataDecoded;
 
             if (method === "transfer") {
-                const toAddress = parameters.find(p => p.name === "to")?.value;
-                const value = parameters.find(p => p.name === "value")?.value;
+                const toAddress = parameters.find((p: any) => p.name === "to")?.value;
+                const value = parameters.find((p: any) => p.name === "value")?.value;
 
                 // Get token info
-                const tokenInfo = tokenAddresses[tx.to] || { symbol: "Token", decimals: 18 };
+
+                const tokenInfo = tokenAddresses[tx.to as keyof typeof tokenAddresses] || { symbol: "Token", decimals: 18 };
                 const formattedValue = formatTokenValue(value, tokenInfo.decimals);
 
                 txInfo.type = `${tokenInfo.symbol} Transfer`;
                 txInfo.description = `Transfer ${formattedValue} ${tokenInfo.symbol} to ${shorten(toAddress)}`;
                 txInfo.displayValue = `${formattedValue} ${tokenInfo.symbol}`;
             } else if (method === "approve") {
-                const spenderAddress = parameters.find(p => p.name === "spender")?.value;
-                const value = parameters.find(p => p.name === "value")?.value;
+                const spenderAddress = parameters.find((p: any) => p.name === "spender")?.value;
+                const value = parameters.find((p: any) => p.name === "value")?.value;
 
-                const tokenInfo = tokenAddresses[tx.to] || { symbol: "Token", decimals: 18 };
+                const tokenInfo = tokenAddresses[tx.to as keyof typeof tokenAddresses] || { symbol: "Token", decimals: 18 };
                 const formattedValue = formatTokenValue(value, tokenInfo.decimals);
 
                 txInfo.type = `${tokenInfo.symbol} Approval`;
@@ -315,7 +316,7 @@ const QueuePanel = ({ safeAddress }: { safeAddress: string }) => {
                 <div className="p-4 text-center">No pending transactions found.</div>
             ) : (
                 <div className="space-y-3">
-                    {pendingTransactions.map((tx, index) => {
+                    {pendingTransactions.map((tx: any, index) => {
                         const txInfo = getTransactionInfo(tx);
 
                         return (
@@ -336,7 +337,7 @@ const QueuePanel = ({ safeAddress }: { safeAddress: string }) => {
                                         <div className="mt-1">
                                             <p className="text-xs text-gray-500">Confirmed by:</p>
                                             <div className="flex flex-wrap gap-1 mt-1">
-                                                {tx.confirmations.map((confirmation, idx) => (
+                                                {tx.confirmations.map((confirmation: any, idx: any) => (
                                                     <span key={idx} className="text-xs bg-gray-200 rounded px-1 py-0.5 font-mono">
                                                         {shorten(confirmation.owner)}
                                                     </span>
