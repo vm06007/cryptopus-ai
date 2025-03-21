@@ -12,6 +12,7 @@ from flask_cors import CORS
 from flask import request
 import asyncio
 import aiohttp
+import sqlite3
 
 from web3 import Web3
 
@@ -39,6 +40,9 @@ class CryptoTradingAssistant:
         self.NILAI_API_URL = os.getenv("NILAI_API_URL")
         self.OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY")
         self.OPENROUTER_API_URL = os.getenv("OPENROUTER_API_URL")
+        self.BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+        self.DB_PATH = os.path.join(self.BASE_DIR, "tokens.db")
+        self.init_db()
 
     async def process_question(self, question, session_id, model):
         history = ""
@@ -139,6 +143,32 @@ class CryptoTradingAssistant:
         except Exception as e:
             logging.error(f"Error in ask_ai: {e}")
             return "An error occurred while processing your question."
+
+    def init_db(self):
+        conn = sqlite3.connect(self.DB_PATH)
+        c = conn.cursor()
+
+        c.execute('''CREATE TABLE IF NOT EXISTS tokens_list (
+            name TEXT,
+            address TEXT,
+            chain TEXT,
+            UNIQUE(name, chain))''')
+
+        tokens_data = [
+            ('ETH', 'ETH', 'Ethereum'),
+            ('USDC', '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48', 'Ethereum'),
+            ('USDT', '0xdAC17F958D2ee523a2206206994597C13D831ec7', 'Ethereum'),
+            ('DAI', '0x6B175474E89094C44Da98b954EedeAC495271d0F', 'Ethereum'),
+            ('WISE', '0x66a0f676479Cee1d7373f3DC2e2952778BfF5bd6', 'Ethereum')
+        ]
+        for name, address, chain in tokens_data:
+            c.execute("INSERT OR IGNORE INTO tokens_list (name, address, chain) VALUES (?, ?, ?)", (name, address, chain))
+
+        conn.commit()
+        conn.close()
+        print("Database initialized.")
+        logging.info("Database initialized.")
+
 
 crypto_assistant = CryptoTradingAssistant()
 
