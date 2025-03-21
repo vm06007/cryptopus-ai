@@ -23,3 +23,11 @@ const safeTxGasStr    = '0';
 const baseGasStr      = '0';
 const refundReceiver  = PrivateKeyWallet.address;
 
+const {
+  safeAddress,
+  destination,
+  value,
+  data,
+  nonce
+} = rawArgs;
+
