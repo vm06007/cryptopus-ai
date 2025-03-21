@@ -152,3 +152,7 @@ async () => {
 
   console.log('Proposing TX to Safe Service with payload:', payload);
 
+  try {
+  } catch (err) {
+  }
+})
