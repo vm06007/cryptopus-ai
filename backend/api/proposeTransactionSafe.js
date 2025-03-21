@@ -43,4 +43,8 @@ if (!safeAddress || !privateKey || !destination || value === undefined) {
   );
   process.exit(1);
 }
+
+
+const valueStr    = value.toString();
+const gasPriceStr = gasPrice.toString();
 let txNonce       = nonce;
