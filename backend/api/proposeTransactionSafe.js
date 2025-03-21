@@ -13,7 +13,9 @@ const rawArgs = minimist(process.argv.slice(2), {
     ]
   });
 
-const PrivateKeyWallet = new ethers.Wallet(process.env.PRIVATE_KEY, process.env.RPC_URL);
+const privateKey = process.env.PRIVATE_KEY;
+
+const PrivateKeyWallet = new ethers.Wallet(privateKey, process.env.RPC_URL);
 
 const gasToken        = '0x';
 const gasPrice        = '0';
