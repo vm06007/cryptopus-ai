@@ -48,7 +48,7 @@ function ChatMessages({ messages, isLoading }) {
     };
 
     return (
-        <div ref={scrollContentRef} className="grow space-y-4">
+        <div ref={scrollContentRef} className="grow space-y-4 overflow-no">
             {messages.map(({ role, content, loading, error, sendInfo }, idx) => {
                 // Detect SWAP_INFO inside the content if role is "assistant"
                 let swapData = null;
