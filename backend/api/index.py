@@ -48,6 +48,7 @@ class CryptoTradingAssistant:
         self.init_db()
 
     async def process_question(self, question, session_id, model):
+        #@TODO: retrieve previous conversation
         history = ""
         context = ""
         send_into = await self.recognize_send_request_with_ai(question, model)
@@ -68,6 +69,7 @@ class CryptoTradingAssistant:
         response = await self.ask_openrouter(prompt, model)
         # interaction = {"user": question, "assistant": response}
         # @TODO: Consider to save interaction to reuse later
+        # nillion.store(interaction)
 
         return response
 
@@ -172,6 +174,7 @@ class CryptoTradingAssistant:
             return response
 
         tokenA, tokenB, AmountA, AmountB = swap_info
+
         chain = "🦄 Uniswap"
 
         # Check for tokens in DB
@@ -476,7 +479,6 @@ def get_pending_txs(address):
     except Exception as e:
         logging.error(f"Error getting transactions for {address}: {str(e)}")
         return jsonify({"error": "Failed to retrieve transactions"}), 500
-
 
 if __name__ == "__main__":
     app.run()
