@@ -142,7 +142,8 @@ const SafeWalletsList = ({ address, onSelectSafe }: { address: string, onSelectS
                         </div>
                     ))}
                 <Button
-                    cta={`Create New Safe ${address ? shorten(address) : ''}`}
+                    // cta={`Create New Safe ${address ? shorten(address) : ''}`}
+                    cta={`Create New Safe With AI Assistant`}
                     onClick_={HandleCreateSafe}
                 />
                 </div>
