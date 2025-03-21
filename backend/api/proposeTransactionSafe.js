@@ -43,3 +43,4 @@ if (!safeAddress || !privateKey || !destination || value === undefined) {
   );
   process.exit(1);
 }
+let txNonce       = nonce;
