@@ -9,6 +9,7 @@ function Chatbot({ chatMode }) {
     const [chatId, setChatId] = useState(null);
     const [messages, setMessages] = useImmer([]);
     const [newMessage, setNewMessage] = useState("");
+    const [sendInfo, setSendInfo] = useState(null);
 
     const isLoading = messages.length && messages[messages.length - 1].loading;
 
@@ -45,7 +46,13 @@ function Chatbot({ chatMode }) {
                 chatMode
             );
 
-            for await (const textChunk of parseSSEStream(jsonResponse, 1000, 100)) {
+            if (jsonResponse.sendInfo) {
+                setSendInfo(jsonResponse.sendInfo);
+            } else {
+                setSendInfo(null);
+            }
+
+            for await (const textChunk of parseSSEStream(jsonResponse, 500, 100)) {
                 setMessages(draft => {
                     draft[draft.length - 1].content += textChunk;
                 });
@@ -71,7 +78,11 @@ function Chatbot({ chatMode }) {
                     <p>👋 Welcome! This is ChatBot Box</p>
                 </div>
             )}
-            <ChatMessages messages={messages} isLoading={isLoading} />
+            <ChatMessages
+                messages={messages}
+                isLoading={isLoading}
+                sendInfo={sendInfo}
+            />
             <ChatInput
                 newMessage={newMessage}
                 isLoading={isLoading}

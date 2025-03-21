@@ -79,7 +79,7 @@ class CryptoTradingAssistant:
             "- 'Send 1000 USDC to some-name.eth\n"
             "- 'I want to send 1,000 USDT to 0x22079A848266A7D2E40CF0fF71a6573D78adcF37\n\n"
             f"User's request: {request}\n\n"
-            "Return ONLY the extracted values as bullet-points without any extra text."
+            "Return ONLY the extracted values as bullet-points without any extra text, mark it as JSON OBJECT"
         )
         response = await self.ask_openrouter(prompt, model)
         return response;

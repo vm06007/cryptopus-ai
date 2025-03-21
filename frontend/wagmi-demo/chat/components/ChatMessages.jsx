@@ -7,7 +7,7 @@ import errorIcon from "../assets/images/error.svg";
 import Image from "next/image";
 import SendTransaction from "../../components/SendTransaction";
 
-function ChatMessages({ messages, isLoading }) {
+function ChatMessages({ messages, sendInfo, isLoading }) {
     const scrollContentRef = useAutoScroll(isLoading);
     return (
         <div ref={scrollContentRef} className="grow space-y-4">
@@ -35,8 +35,8 @@ function ChatMessages({ messages, isLoading }) {
                                             <Spinner />
                                         </div>
                                     )}
-                                    {!loading && content.includes("SEND_INFO") && (
-                                        <SendTransaction />
+                                    {!loading && sendInfo?.Amount && (
+                                        <SendTransaction to={sendInfo.To} amount={sendInfo.Amount} />
                                     )}
                                 </>
                             ) : (

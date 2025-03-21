@@ -2,7 +2,6 @@ const BASE_URL = "http://localhost:5000";
 const VERSION = "v1";
 
 export async function createChat() {
-
     const resReal = await fetch(`${BASE_URL}/api/${VERSION}/about`, {
         method: "POST",
         headers: { "Content-Type": "application/json" }
@@ -26,8 +25,39 @@ export async function createChat() {
     return data;
 }
 
-export async function sendChatMessage(chatId: number, message: string, mode: string) {
+// Function to extract SEND_INFO from text
+function extractSendInfo(text: string) {
+    const regex = /SEND_INFO:\s*(\{[\s\S]*?\})/;
+    const match = text.match(regex);
 
+    if (match && match[1]) {
+        try {
+            // Parse the JSON string to an object
+            const jsonObj = JSON.parse(match[1]);
+
+            // Create a modified version of the text without the JSON part
+            const modifiedText = text.replace(regex, '');
+
+            return {
+                sendInfo: jsonObj,
+                modifiedText: modifiedText.trim()
+            };
+        } catch (error) {
+            console.error("Error parsing JSON:", error);
+            return {
+                sendInfo: null,
+                modifiedText: text
+            };
+        }
+    }
+
+    return {
+        sendInfo: null,
+        modifiedText: text
+    };
+}
+
+export async function sendChatMessage(chatId: number, message: string, mode: string) {
     console.log("chatId:", chatId);
     console.log("Sending message:", message);
 
@@ -43,10 +73,14 @@ export async function sendChatMessage(chatId: number, message: string, mode: str
         })
     });
 
-    const dataReadl = await resReal.json();
-    const reply = dataReadl.response;
+    const dataReal = await resReal.json();
+    const reply = dataReal.response;
 
-    const chunks = reply.split('\n');
+    // Extract any SEND_INFO from the reply
+    const { sendInfo, modifiedText } = extractSendInfo(reply);
+
+    // Use the modified text (with SEND_INFO removed) for chunking
+    const chunks = modifiedText.split('\n');
     const messages = chunks.map((line: string, i: number) => ({
         type: 'event',
         data: i < chunks.length - 1 ? line + '\n' : line
@@ -55,7 +89,10 @@ export async function sendChatMessage(chatId: number, message: string, mode: str
     const res = {
         ok: true,
         status: 200,
-        json: async () => ({ messages })
+        json: async () => ({
+            messages,
+            sendInfo // Include the extracted sendInfo in the response
+        })
     };
 
     if (!res.ok) {
