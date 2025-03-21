@@ -180,10 +180,86 @@ const AIKeysPanel = ({ safeAddress }: {safeAddress: string}) => (
 );
 
 // Updated QueuePanel component that fetches real transaction data
+// Updated QueuePanel component with improved transaction display
 const QueuePanel = ({ safeAddress }: { safeAddress: string }) => {
     const [pendingTransactions, setPendingTransactions] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
+
+    // Common token addresses
+    const tokenAddresses = {
+        "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48": { symbol: "USDC", decimals: 6 },
+        "0xdAC17F958D2ee523a2206206994597C13D831ec7": { symbol: "USDT", decimals: 6 },
+        "0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599": { symbol: "WBTC", decimals: 8 },
+        "0x6B175474E89094C44Da98b954EedeAC495271d0F": { symbol: "DAI", decimals: 18 },
+        // Add more token addresses as needed
+    };
+
+    // Convert WEI to ETH with proper formatting
+    const weiToEth = (weiValue) => {
+        if (!weiValue) return "0 ETH";
+        const ethValue = parseFloat(weiValue) / 1e18;
+        return `${ethValue.toFixed(ethValue < 0.0001 ? 8 : 4)} ETH`;
+    };
+
+    // Format token value based on decimals
+    const formatTokenValue = (value, decimals) => {
+        if (!value) return "0";
+        const formattedValue = parseFloat(value) / Math.pow(10, decimals);
+        return formattedValue.toLocaleString(undefined, {
+            maximumFractionDigits: formattedValue < 0.0001 ? 8 : 4
+        });
+    };
+
+    // Get transaction type and description based on data
+    const getTransactionInfo = (tx) => {
+        // Default transaction info
+        let txInfo = {
+            type: "Transaction",
+            description: "Contract interaction",
+            displayValue: ""
+        };
+
+        // Handle ETH transfers
+        if (tx.value && tx.value !== "0") {
+            txInfo.type = "ETH Transfer";
+            txInfo.description = `Send ${weiToEth(tx.value)} to ${shorten(tx.to)}`;
+            txInfo.displayValue = weiToEth(tx.value);
+        }
+
+        // Handle token transfers or other contract interactions
+        if (tx.dataDecoded) {
+            const { method, parameters } = tx.dataDecoded;
+
+            if (method === "transfer") {
+                const toAddress = parameters.find(p => p.name === "to")?.value;
+                const value = parameters.find(p => p.name === "value")?.value;
+
+                // Get token info
+                const tokenInfo = tokenAddresses[tx.to] || { symbol: "Token", decimals: 18 };
+                const formattedValue = formatTokenValue(value, tokenInfo.decimals);
+
+                txInfo.type = `${tokenInfo.symbol} Transfer`;
+                txInfo.description = `Transfer ${formattedValue} ${tokenInfo.symbol} to ${shorten(toAddress)}`;
+                txInfo.displayValue = `${formattedValue} ${tokenInfo.symbol}`;
+            } else if (method === "approve") {
+                const spenderAddress = parameters.find(p => p.name === "spender")?.value;
+                const value = parameters.find(p => p.name === "value")?.value;
+
+                const tokenInfo = tokenAddresses[tx.to] || { symbol: "Token", decimals: 18 };
+                const formattedValue = formatTokenValue(value, tokenInfo.decimals);
+
+                txInfo.type = `${tokenInfo.symbol} Approval`;
+                txInfo.description = `Approve ${spenderAddress ? shorten(spenderAddress) : "address"} to spend ${formattedValue} ${tokenInfo.symbol}`;
+            } else {
+                // Other contract methods
+                txInfo.type = method.charAt(0).toUpperCase() + method.slice(1);
+                txInfo.description = `Call ${method} on ${shorten(tx.to)}`;
+            }
+        }
+
+        return txInfo;
+    };
 
     useEffect(() => {
         const fetchPendingTransactions = async () => {
@@ -239,36 +315,52 @@ const QueuePanel = ({ safeAddress }: { safeAddress: string }) => {
                 <div className="p-4 text-center">No pending transactions found.</div>
             ) : (
                 <div className="space-y-3">
-                    {pendingTransactions.map((tx: any, index) => (
-                        <div key={index} className="p-3 border rounded-md bg-gray-50">
-                            <div className="flex justify-between">
-                                <span className="font-medium">{tx.type || "Transaction"}</span>
-                                <span className="text-gray-500">{tx.status || "Pending"}</span>
-                            </div>
-                            <div className="mt-1 text-sm">
-                                <p>To: {shorten(tx.to)}</p>
-                                {tx.value && <p>Amount: {tx.value} WEI</p>}
-                                <p>Created: {formatTimeAgo(tx.submissionDate || new Date())}</p>
-                                {tx.confirmationsRequired && (
+                    {pendingTransactions.map((tx, index) => {
+                        const txInfo = getTransactionInfo(tx);
+
+                        return (
+                            <div key={index} className="p-3 border rounded-md bg-gray-50">
+                                <div className="flex justify-between">
+                                    <span className="font-medium">{txInfo.type}</span>
+                                    <span className="text-gray-500">{tx.status || "Pending"}</span>
+                                </div>
+                                <div className="mt-1 text-sm">
+                                    <p className="font-medium">{txInfo.description}</p>
+                                    <p>To: <span className="font-mono">{shorten(tx.to)}</span></p>
+                                    {tx.value && tx.value !== "0" && (
+                                        <p>Amount: {weiToEth(tx.value)}</p>
+                                    )}
+                                    <p>Created: {formatTimeAgo(tx.submissionDate || new Date())}</p>
                                     <p>Confirmations: {tx.confirmations.length || 0}/{tx.confirmationsRequired}</p>
-                                )}
+                                    {tx.confirmations.length > 0 && (
+                                        <div className="mt-1">
+                                            <p className="text-xs text-gray-500">Confirmed by:</p>
+                                            <div className="flex flex-wrap gap-1 mt-1">
+                                                {tx.confirmations.map((confirmation, idx) => (
+                                                    <span key={idx} className="text-xs bg-gray-200 rounded px-1 py-0.5 font-mono">
+                                                        {shorten(confirmation.owner)}
+                                                    </span>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+                                <div className="mt-2 flex gap-1">
+                                    <Button cta="Explain Transaction" onClick_={() => console.log("Explaining transaction", tx.safeTxHash)} />
+                                    {tx.confirmations.length < tx.confirmationsRequired ? (
+                                        <Button cta="Confirm Transaction" onClick_={() => console.log("Signing transaction", tx.safeTxHash)} />
+                                    ) : (
+                                        <Button cta="Execute Transaction" onClick_={() => console.log("Executing transaction", tx.safeTxHash)} />
+                                    )}
+                                </div>
                             </div>
-                            <div className="mt-2 flex gap-1">
-                                <Button cta="Explain Transaction" onClick_={() => console.log("Explaining transaction", tx.safeTxHash)} />
-                                {tx.confirmationsRequired && tx.confirmations.length < tx.confirmationsRequired ? (
-                                    <Button cta="Sign Transaction" onClick_={() => console.log("Signing transaction", tx.safeTxHash)} />
-                                ) : (
-                                    <Button cta="Execute Transaction" onClick_={() => console.log("Executing transaction", tx.safeTxHash)} />
-                                )}
-                            </div>
-                        </div>
-                    ))}
+                        );
+                    })}
                 </div>
             )}
         </div>
     );
 };
-
 // Helper function to format time ago
 const formatTimeAgo = (date: string) => {
     const now = new Date();
@@ -345,7 +437,7 @@ export default function Home() {
                                                 <MonoLabel label={shorten(wallet.address)} />
                                             </div>
                                             <Button
-                                                cta="Make active"
+                                                cta="Make Active"
                                                 onClick_={() => {
                                                     setActiveWallet(wallet);
                                                 }}
