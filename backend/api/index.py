@@ -1,8 +1,6 @@
 import os
 import certifi
 import requests
-
-os.environ["SSL_CERT_FILE"] = certifi.where()
 import os
 import re
 from dotenv import load_dotenv
@@ -14,6 +12,8 @@ from flask import request
 import asyncio
 import aiohttp
 import sqlite3
+
+os.environ["SSL_CERT_FILE"] = certifi.where()
 
 from web3 import Web3
 

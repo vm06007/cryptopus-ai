@@ -6,3 +6,5 @@ Web3==6.10.0
 certifi==2024.2.2
 setuptools
 python-dotenv==0.21.1
+nillion-client==0.2.0
+secretvaults==1.1.2
