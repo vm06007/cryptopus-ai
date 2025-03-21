@@ -49,6 +49,7 @@ class CryptoTradingAssistant:
         self.init_db()
 
     async def process_question(self, question, session_id, model):
+        #@TODO: retrieve previous conversation
         history = ""
         context = ""
         send_into = await self.recognize_send_request_with_ai(question, model)
@@ -57,6 +58,7 @@ class CryptoTradingAssistant:
             f"Context: {context}\n\n"
             f"SEND_INFO: {send_into}\n\n"
             f"Question: {question}\n\n"
+            "You are a crypto sending assistant Octopus AI. Your task is to extract the following information from the user's request:\n"
             "Instructions: Answer the question with the following format:\n"
             "- Use bullet points (or emojis as bullet point) to list key features or details.\n"
             "- Separate ideas into paragraphs for better readability!\n"
@@ -65,17 +67,22 @@ class CryptoTradingAssistant:
             "- SEND_INFO: must have all 3 parameters, otherwise remove SEND_INFO from response completely!\n"
         )
 
-        # response = await self.ask_nilai(prompt, model)
-        response = await self.ask_openrouter(prompt, model)
+        response = ""
+        if (model == default_nil_ai_model):
+            response = await self.ask_nilai(prompt, model)
+        else:
+            response = await self.ask_openrouter(prompt, model)
+
         # interaction = {"user": question, "assistant": response}
         # @TODO: Consider to save interaction to reuse later
+        # nillion.store(interaction)
 
         return response
 
     async def recognize_send_request_with_ai(self, request, model):
         """Use AI to extract destination from the user's request."""
         prompt = (
-            "You are a crypto sending assistant. Your task is to extract the following information from the user's request:\n"
+            "You are a crypto sending assistant Octopus AI. Your task is to extract the following information from the user's request:\n"
             "1. Token: The token symbol the user wants to send (e.g., WISE, ETH, BTC).\n"
             "2. Amount: The token amount the user wants to send.\n"
             "3. Destination: Address or ENS name where user wants to send funds.\n"
@@ -173,6 +180,7 @@ class CryptoTradingAssistant:
             return response
 
         tokenA, tokenB, AmountA, AmountB = swap_info
+
         chain = "🦄 Uniswap"
 
         # Check for tokens in DB
@@ -422,6 +430,20 @@ def trade_post():
     response = asyncio.run(crypto_assistant.trade(question))
     return jsonify({"response": response})
 
+@app.route('/safe', methods=['POST', 'OPTIONS'])
+def ask_safe():
+    if request.method == 'OPTIONS':
+        return '', 200
+
+    data = request.get_json() or {}
+    question = data.get('question', '')
+
+    if not question:
+        return jsonify({"error": "Question is empty"}), 400
+
+    response = asyncio.run(crypto_assistant.ask_ai(question, 'ask_nilai'))
+    return jsonify({"response": response})
+
 @app.route("/api/v1/owners/<address>/safes", methods=["GET"])
 def get_safe_wallets(address):
     try:
@@ -463,7 +485,6 @@ def get_pending_txs(address):
     except Exception as e:
         logging.error(f"Error getting transactions for {address}: {str(e)}")
         return jsonify({"error": "Failed to retrieve transactions"}), 500
-
 
 if __name__ == "__main__":
     app.run()

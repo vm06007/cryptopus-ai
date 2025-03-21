@@ -17,7 +17,7 @@ interface JSONResponse {
 // Parse a JSON response from the server and yield each SSE message
 export async function* parseSSEStream(
     jsonResponse: JSONResponse,
-    fetchDelay: number = 500,
+    fetchDelay: number = 250,
     chunkDelay: number = 100
 ): AsyncGenerator<any> {
     console.log("Incoming JSON Response:", jsonResponse);

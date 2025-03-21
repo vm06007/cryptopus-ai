@@ -53,7 +53,7 @@ function Chatbot({ chatMode }) {
                 });
             }
 
-            for await (const textChunk of parseSSEStream(jsonResponse, 500, 100)) {
+            for await (const textChunk of parseSSEStream(jsonResponse, 250, 100)) {
                 setMessages((draft) => {
                     draft[draft.length - 1].content += textChunk;
                 });
