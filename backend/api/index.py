@@ -200,7 +200,16 @@ class CryptoTradingAssistant:
                 tokenA_address = token_dict[tokenA]
                 tokenB_address = token_dict[tokenB]
 
-                message = ""
+                swap_info_object = {
+                    "from_token": tokenA_address,
+                    "to_token": tokenB_address,
+                    "from_amount": AmountA,
+                    "to_amount": AmountB,
+                    "chain": chain
+                }
+
+                message = f"🔄 **Swap Request** 🔄\n\n"
+                message += f"SWAP_INFO: {swap_info_object} \n"
                 if AmountA and AmountB:
                     message += f"You requested that swap: {AmountA} {tokenA} ({tokenA_address}) to {AmountB} {tokenB} ({tokenB_address}) on {chain}"
                 elif AmountA:
