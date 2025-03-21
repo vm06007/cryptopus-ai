@@ -9,5 +9,10 @@ dotenv.config()
 const PRIVATE_KEY = process.env.PRIVATE_KEY
 
 (async () => {
-
+    const safeAddress = process.argv[2]
+    if (!safeAddress) {
+      throw new Error(
+        'Missing Safe address argument.\nUsage: node safeOwnerProposer.js <SAFE_ADDRESS>'
+      )
+    }
 })
