@@ -83,7 +83,6 @@ const SafeWalletsList = ({ address, onSelectSafe }: { address: string, onSelectS
         return <div className="mt-4 p-2">No Safe wallets found for this address.</div>;
     }
 
-
     return (
         <div className="mt-4">
             <div className="flex items-center justify-between mb-0">
@@ -152,32 +151,85 @@ const SafeWalletsList = ({ address, onSelectSafe }: { address: string, onSelectS
     );
 };
 
-// Components for the right panel
-const AIKeysPanel = ({ safeAddress }: {safeAddress: string}) => (
-    <div className="bg-white rounded-lg p-4 border border-gray-200">
-        <h2 className="text-xl font-bold mb-3">AI Keys Permission for Safe</h2>
-        <div className="mb-4">
-            <MonoLabel label={shorten(safeAddress)} />
-        </div>
-        <div className="space-y-3">
-            <div className="flex items-center justify-between border-b pb-2">
-                <span>Allow AI to view transactions</span>
-                <input type="checkbox" className="h-5 w-5" defaultChecked />
+const AIKeysPanel = ({ safeAddress }: {safeAddress: string}) => {
+    const [canExecute, setCanExecute] = useState(false);
+    const [autoReject, setAutoReject] = useState(false);
+    const [autoExecute, setAutoExecute] = useState(false);
+
+    const handleExecuteChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const isChecked = e.target.checked;
+        setCanExecute(isChecked);
+
+        // If unchecking the execute permission, also uncheck dependent options
+        if (!isChecked) {
+            setAutoReject(false);
+            setAutoExecute(false);
+        }
+    };
+
+    const handleAutoRejectChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setAutoReject(e.target.checked);
+    };
+
+    const handleAutoExecuteChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setAutoExecute(e.target.checked);
+    };
+
+    return (
+        <div className="bg-white rounded-lg p-4 border border-gray-200">
+            <h2 className="text-xl font-bold mb-3">AI Keys Permission for Safe</h2>
+            <div className="mb-4">
+                <MonoLabel label={shorten(safeAddress)} />
             </div>
-            <div className="flex items-center justify-between border-b pb-2">
-                <span>Allow AI to propose transactions</span>
-                <input type="checkbox" className="h-5 w-5" defaultChecked />
+            <div className="space-y-3">
+                <div className="flex items-center justify-between border-b pb-2">
+                    <span>Allow AI to view transactions</span>
+                    <input type="checkbox" className="h-5 w-5" defaultChecked />
+                </div>
+                <div className="flex items-center justify-between border-b pb-2">
+                    <span>Allow AI to sign transactions</span>
+                    <input type="checkbox" className="h-5 w-5" defaultChecked />
+                </div>
+                <div className="flex items-center justify-between border-b pb-2">
+                    <span>Allow AI to execute transactions</span>
+                    <input
+                        type="checkbox"
+                        className="h-5 w-5"
+                        checked={canExecute}
+                        onChange={handleExecuteChange}
+                    />
+                </div>
+                <div className="flex items-center justify-between border-b pb-2">
+                    <span className={!canExecute ? "text-gray-400" : ""}>Auto-reject malicious transactions</span>
+                    <input
+                        type="checkbox"
+                        className="h-5 w-5"
+                        checked={autoReject}
+                        onChange={handleAutoRejectChange}
+                        disabled={!canExecute}
+                        style={{ opacity: !canExecute ? 0.5 : 1 }}
+                    />
+                </div>
+                <div className="flex items-center justify-between border-b pb-2">
+                    <span className={!canExecute ? "text-gray-400" : ""}>Auto-execute non-malicious transactions</span>
+                    <input
+                        type="checkbox"
+                        className="h-5 w-5"
+                        checked={autoExecute}
+                        onChange={handleAutoExecuteChange}
+                        disabled={!canExecute}
+                        style={{ opacity: !canExecute ? 0.5 : 1 }}
+                    />
+                </div>
             </div>
-            <div className="flex items-center justify-between border-b pb-2">
-                <span>Allow AI to execute signed transactions</span>
-                <input type="checkbox" className="h-5 w-5" />
+            <div className="flex mt-4 gap-1">
+                <Button cta="Add AI" onClick_={() => console.log("Saving AI permissions for", safeAddress)} />
+                <Button cta="Save Permissions" onClick_={() => console.log("Saving AI permissions for", safeAddress)} />
             </div>
         </div>
-        <div className="mt-4">
-            <Button cta="Save AI Permissions" onClick_={() => console.log("Saving AI permissions for", safeAddress)} />
-        </div>
-    </div>
-);
+    );
+};
+
 
 // Updated QueuePanel component that fetches real transaction data
 // Updated QueuePanel component with improved transaction display
