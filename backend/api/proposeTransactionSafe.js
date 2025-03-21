@@ -44,7 +44,6 @@ if (!safeAddress || !privateKey || !destination || value === undefined) {
   process.exit(1);
 }
 
-
 const valueStr    = value.toString();
 const gasPriceStr = gasPrice.toString();
 let txNonce       = nonce;
@@ -61,3 +60,10 @@ console.log('Final resolved args:', {
   refundReceiver,
   nonce: txNonce
 });
+
+async function fetchNonce(safeAddr) {
+  const url = `https://safe-transaction-arbitrum.safe.global/api/v1/safes/${safeAddr}/`;
+  console.log('Fetching Safe nonce from:', url);
+  const res = await axios.get(url);
+  return res.data.nonce;
+}
