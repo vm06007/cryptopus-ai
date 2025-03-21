@@ -166,5 +166,11 @@ async () => {
       transactionId: res.data.id
     });
   } catch (err) {
+    if (err.response) {
+      console.error(`Safe API error (status ${err.response.status}):`, err.response.data);
+    } else {
+      console.error('Request error:', err.message);
+    }
+    process.exit(1);
   }
 })
