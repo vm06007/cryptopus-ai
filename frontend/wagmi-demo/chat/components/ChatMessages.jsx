@@ -5,6 +5,7 @@ import Spinner from "../components/Spinner";
 import userIcon from "../assets/images/user.svg";
 import errorIcon from "../assets/images/error.svg";
 import Image from "next/image";
+import SendTransaction from "../../components/SendTransaction";
 
 function ChatMessages({ messages, isLoading }) {
     const scrollContentRef = useAutoScroll(isLoading);
@@ -33,6 +34,9 @@ function ChatMessages({ messages, isLoading }) {
                                         <div className="mt-2">
                                             <Spinner />
                                         </div>
+                                    )}
+                                    {!loading && content.includes("SEND_INFO") && (
+                                        <SendTransaction />
                                     )}
                                 </>
                             ) : (
