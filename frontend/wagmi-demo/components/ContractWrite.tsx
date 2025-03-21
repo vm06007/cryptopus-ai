@@ -1,33 +1,33 @@
-'use client';
+"use client";
 
-import Wrapper from 'components/Wrapper';
-import { shorten, type AddressString } from 'lib/utils';
-import { useEffect, useState } from 'react';
-import { parseEther } from 'viem';
-// import { sepolia } from 'viem/chains';
-import { useAccount, useWriteContract, useEnsAddress } from 'wagmi';
+import Wrapper from "components/Wrapper";
+import { shorten, type AddressString } from "lib/utils";
+import { useEffect, useState } from "react";
+import { parseEther } from "viem";
+// import { sepolia } from "viem/chains";
+import { useAccount, useWriteContract, useEnsAddress } from "wagmi";
 
-import Button from './Button';
-import MonoLabel from './MonoLabel';
+import Button from "./Button";
+import MonoLabel from "./MonoLabel";
 
 const ABI = [
     {
         inputs: [
             {
-                internalType: 'address',
-                name: 'to',
-                type: 'address',
+                internalType: "address",
+                name: "to",
+                type: "address",
             },
             {
-                internalType: 'uint256',
-                name: 'amount',
-                type: 'uint256',
+                internalType: "uint256",
+                name: "amount",
+                type: "uint256",
             },
         ],
-        name: 'transfer',
+        name: "transfer",
         outputs: [],
-        stateMutability: 'nonpayable',
-        type: 'function',
+        stateMutability: "nonpayable",
+        type: "function",
     },
 ] as const;
 
@@ -50,14 +50,14 @@ const ContractWrite = ({ to, amount }: { to: string; amount: string }) => {
         }
 
         // Direct address case
-        if (to.startsWith('0x')) {
+        if (to.startsWith("0x")) {
             setEnsLookupName(undefined);
             setResolvedAddress(to as AddressString);
             return;
         }
 
         // ENS name with .eth
-        if (to.includes('.eth')) {
+        if (to.includes(".eth")) {
             setEnsLookupName(to);
             return;
         }
@@ -107,7 +107,7 @@ const ContractWrite = ({ to, amount }: { to: string; amount: string }) => {
     };
 
     // Display name logic for UI
-    const isExplicitEns = to && to.includes('.eth');
+    const isExplicitEns = to && to.includes(".eth");
     const isImplicitEns = ensLookupName && !isExplicitEns && to;
     const displayName = isImplicitEns ? `${to} (${ensLookupName})` : ensLookupName || to;
 
