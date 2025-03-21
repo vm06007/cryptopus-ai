@@ -15,4 +15,13 @@ const PRIVATE_KEY = process.env.PRIVATE_KEY
         'Missing Safe address argument.\nUsage: node safeOwnerProposer.js <SAFE_ADDRESS>'
       )
     }
+     // 2. Load the proposer key from environment variable
+     const proposerPrivateKey = process.env.PRIVATE_KEY
+     console.log(proposerPrivateKey, "proposerPrivateKey")
+     if (!proposerPrivateKey) {
+       throw new Error("Environment variable PRIVATE_KEY must be set to an existing Safe owner's private key")
+
+     }
 })
+
+
