@@ -108,5 +108,3 @@ if __name__ == "__main__":
 
     # Or if 'getAddressFromPrivateKey' actually expects the private key hex, you must
     # pass 'private_key' instead of "0x12341234..." above.
-
-export { py_store_private_key, py_retrieve_private_key, py_retrieve_address_from_private_key };
