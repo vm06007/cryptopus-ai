@@ -21,7 +21,7 @@ const gasToken        = '0x0000000000000000000000000000000000000000';
 const gasPrice        = '0';
 const safeTxGasStr    = '0';
 const baseGasStr      = '0';
-const refundReceiver  = PrivateKeyWallet.address;
+const refundReceiver  = '0x0000000000000000000000000000000000000000';
 
 const {
   safeAddress,
