@@ -6,7 +6,7 @@ import Button from 'components/Button';
 import ContractEvent from 'components/ContractEvent';
 import ContractRead from 'components/ContractRead';
 import ContractReads from 'components/ContractReads';
-import ContractWrite from 'components/ContractWrite';
+// import ContractWrite from 'components/ContractWrite';
 import EnsAddress from 'components/EnsAddress';
 import EnsAvatar from 'components/EnsAvatar';
 import EnsName from 'components/EnsName';
@@ -166,7 +166,7 @@ export default function Home() {
                 {/*<SendTransaction />*/}
                 <ContractRead />
                 <ContractReads />
-                <ContractWrite />
+                {/*<ContractWrite />*/}
                 <ContractEvent />
                 <FeeData />
                 <Token />
