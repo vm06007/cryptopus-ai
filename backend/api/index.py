@@ -19,7 +19,16 @@ os.environ["SSL_CERT_FILE"] = certifi.where()
 from web3 import Web3
 
 from schema_create import create_schema
-from sv_quickstart.getPrivateKeyInfo import py_store_private_key, py_retrieve_private_key, py_retrieve_address_from_private_key
+import sys
+import os
+
+# Add sv_quickstart folder to Python path
+base_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', 'sv-quickstart'))
+if base_dir not in sys.path:
+    sys.path.append(base_dir)
+from getPrivateKeyInfo import py_store_private_key, py_retrieve_private_key, py_retrieve_address_from_private_key
+
+
 
 load_dotenv()
 
