@@ -66,8 +66,12 @@ class CryptoTradingAssistant:
             "- SEND_INFO: must have all 3 parameters, otherwise remove SEND_INFO from response completely!\n"
         )
 
-        # response = await self.ask_nilai(prompt, model)
-        response = await self.ask_openrouter(prompt, model)
+        response = ""
+        if (model == default_nil_ai_model):
+            response = await self.ask_nilai(prompt, model)
+        else:
+            response = await self.ask_openrouter(prompt, model)
+
         # interaction = {"user": question, "assistant": response}
         # @TODO: Consider to save interaction to reuse later
         # nillion.store(interaction)
