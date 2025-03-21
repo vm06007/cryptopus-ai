@@ -4,6 +4,7 @@ import requests
 
 os.environ["SSL_CERT_FILE"] = certifi.where()
 import os
+import re
 from dotenv import load_dotenv
 from datetime import datetime
 import logging
@@ -144,6 +145,120 @@ class CryptoTradingAssistant:
             logging.error(f"Error in ask_ai: {e}")
             return "An error occurred while processing your question."
 
+    async def trade(self, request: str):
+
+        # @TODO: use wallet address to identify user (pass to function)
+        user_id = 'endpoint: '+ str(datetime.now())
+        # @TODO: add history concep
+        history = ""
+
+        swap_info = await self.recognize_swap_request_with_ai(request, default_openrouter_ai_model)
+        logging.info(f"Swap request: {swap_info}")
+        prompt = (
+            f"History: {history}\n\n"
+            "Instructions: Answer the question with the following format:\n"
+            "- Use bullet points to list key features or details.\n"
+            "- Separate ideas into paragraphs for better readability.\n"
+            "- Always include emojis to make the text more engaging.\n"
+        )
+
+        response = await self.ask_openrouter(prompt, default_openrouter_ai_model)
+
+        if not swap_info:
+            return response
+
+        tokenA, tokenB, AmountA, AmountB = swap_info
+        chain = "Ethereum"
+
+        # Check for tokens in DB
+        conn = sqlite3.connect(self.DB_PATH)
+        c = conn.cursor()
+        c.execute("SELECT name, address FROM tokens_list")
+        tokens = c.fetchall()
+        conn.close()
+
+        # Construct dictionary for tokens
+        token_dict = {name: address for name, address in tokens}
+        supported_tokens = set(token_dict.keys())
+
+        # Verify tokens
+        if not tokenA:
+            message = (
+                f"⚠️ TokenA is missing. Both TokenA and TokenB must be specified and supported. Please check your input.\n"
+                f"Supported tokens: {', '.join(supported_tokens)}"
+            )
+
+        else:
+            unsupported_tokens = [t for t in (tokenA, tokenB) if t not in supported_tokens]
+            if unsupported_tokens:
+                message = (
+                    f"⚠️ The following tokens are not supported: {', '.join(unsupported_tokens)}.\n"
+                    f"Supported tokens: {', '.join(supported_tokens)}"
+                )
+                return message
+
+            else:
+                tokenA_address = token_dict[tokenA]
+                tokenB_address = token_dict[tokenB]
+
+                message = ""
+                if AmountA and AmountB:
+                    message += f"You requested that swap: {AmountA} {tokenA} ({tokenA_address}) to {AmountB} {tokenB} ({tokenB_address}) on {chain}"
+                elif AmountA:
+                    message += f"You requested that swap: {AmountA} {tokenA} ({tokenA_address}) to {tokenB} ({tokenB_address}) on {chain}"
+                elif AmountB:
+                    message += f"You requested that swap: {tokenA} ({tokenA_address}) to {AmountB} {tokenB} ({tokenB_address}) on {chain}"
+                else:
+                    message += f"You requested that swap: {tokenA} ({tokenA_address}) to {tokenB} ({tokenB_address}) on {chain}"
+
+                message += (
+                    "**⚠️ Please double-check details.**"
+                )
+
+        # interaction_data = {"user": request, "assistant": message}
+        # @TODO: Save interaction_data for AI training
+        return message
+
+    async def recognize_swap_request_with_ai(self, request, model):
+        """Use AI to extract tokens from the user's request."""
+        prompt = (
+            "You are a crypto trading assistant. Your task is to extract the following information from the user's request:\n"
+            "1. TokenA: The token symbol the user wants to swap FROM (e.g., WISE, ETH, BTC).\n"
+            "2. TokenB: The token symbol the user wants to swap TO (e.g., USDT, ETH, DAI).\n"
+            "3. AmountA: The amount of TokenA the user wants to swap. If unspecified, return an empty string ''.\n"
+            "4. AmountB: The amount of TokenB the user wants to receive. If unspecified, return an empty string ''.\n\n"
+            "IMPORTANT:\n"
+            "- If the user wants to 'sell' or 'swap' a token, TokenA is the token being sold/swapped, and AmountA is the amount.\n"
+            "- If the user wants to 'buy' a token, TokenB is the token being bought, and AmountB is the amount.\n"
+            "- Return the extracted values in this exact format: TokenA: <TokenA>, TokenB: <TokenB>, AmountA: <AmountA>, AmountB: <AmountB>\n"
+            "- If any value is missing or not provided by the user, replace it with an empty string ''.\n\n"
+            f"User's request: {request}\n\n"
+            "Return only the extracted values without any extra text."
+        )
+
+        response = await self.ask_openrouter(prompt, model)
+
+        # Try to parse the response with labels
+        pattern = re.compile(
+            r"TokenA:\s*(?:\"([^\"]*)\"|'([^']*)'|([\w-]*)|())\s*,\s*"
+            r"TokenB:\s*(?:\"([^\"]*)\"|'([^']*)'|([\w-]*)|())\s*,\s*"
+            r"(?:AmountA:\s*(?:\"?([0-9.,]*)\"?)\s*,?\s*)?"
+            r"(?:AmountB:\s*(?:\"?([0-9.,]*)\"?)\s*,?\s*)?"
+            r"|(?:AmountB:\s*(?:\"?([0-9.,]*)\"?)\s*,?\s*)?"
+            r"(?:AmountA:\s*(?:\"?([0-9.,]*)\"?)\s*,?\s*)?"
+        )
+        match = pattern.search(response)
+
+        if match:
+            tokenA = (match.group(1) or match.group(2) or match.group(3) or '').upper()
+            tokenB = (match.group(5) or match.group(6) or match.group(7) or '').upper()
+            amountA = (match.group(9) or match.group(12) or '').rstrip(',')
+            amountB = (match.group(10) or match.group(11) or '').rstrip(',')
+
+            return tokenA, tokenB, amountA, amountB
+
+        return '', '', '', ''
+
     def init_db(self):
         conn = sqlite3.connect(self.DB_PATH)
         c = conn.cursor()
@@ -259,6 +374,28 @@ def ask_open_router_post():
     response = asyncio.run(crypto_assistant.ask_openrouter(question, model))
     return jsonify({"response": response})
 
+@app.route('/trade/<path:question>', methods=['GET'])
+def trade_get(question):
+    if not question:
+        return jsonify({"error": "Question is empty"}), 400
+
+    response = asyncio.run(crypto_assistant.trade(question))
+    return jsonify({"response": response})
+
+@app.route('/trade', methods=['POST', 'OPTIONS'])
+def trade_post():
+    if request.method == 'OPTIONS':
+        return '', 200
+
+    data = request.get_json() or {}
+    question = data.get('question', '')
+
+    if not question:
+        return jsonify({"error": "Question is empty"}), 400
+
+    response = asyncio.run(crypto_assistant.trade(question))
+    return jsonify({"response": response})
+
 @app.route("/api/v1/owners/<address>/safes", methods=["GET"])
 def get_safe_wallets(address):
     try:
@@ -300,6 +437,7 @@ def get_pending_txs(address):
     except Exception as e:
         logging.error(f"Error getting transactions for {address}: {str(e)}")
         return jsonify({"error": "Failed to retrieve transactions"}), 500
+
 
 if __name__ == "__main__":
     app.run()
