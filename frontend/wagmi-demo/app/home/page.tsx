@@ -6,7 +6,7 @@ import Balance from "components/Balance";
 import { useState, useEffect } from "react";
 import Chatbot from "chat/components/Chatbot";
 
-import { getSafeWallets } from "chat/api";
+import { getSafeWallets, getPendingTransactions } from "chat/api";
 
 /*import BlockNumber from "components/BlockNumber";
 import ContractEvent from "components/ContractEvent";
@@ -49,7 +49,7 @@ const HandleCreateSafe = () => {
 const SafeWalletsList = ({ address, onSelectSafe }: { address: string, onSelectSafe: (safeAddress: string, view: string) => void }) => {
     const [safeWallets, setSafeWallets] = useState([]);
     const [loading, setLoading] = useState(false);
-    const [error, setError] = useState(null);
+    const [error, setError] = useState('');
 
     useEffect(() => {
         const fetchSafeWallets = async () => {
@@ -59,7 +59,7 @@ const SafeWalletsList = ({ address, onSelectSafe }: { address: string, onSelectS
             try {
                 const data = await getSafeWallets(address);
                 setSafeWallets(data.safes || []);
-                setError(null);
+                setError('');
             } catch (err) {
                 console.error("Failed to fetch safe wallets:", err);
                 setSafeWallets([]);
@@ -180,46 +180,114 @@ const AIKeysPanel = ({ safeAddress }: {safeAddress: string}) => (
     </div>
 );
 
-const QueuePanel = ({ safeAddress }: {safeAddress: string}) => (
-    <div className="bg-white rounded-lg p-4 border border-gray-200">
-        <h2 className="text-xl font-bold mb-3">Transaction Queue</h2>
-        <div className="mb-4">
-            <MonoLabel label={shorten(safeAddress)} />
-        </div>
-        <div className="space-y-3">
-            <div className="p-3 border rounded-md bg-gray-50">
-                <div className="flex justify-between">
-                    <span className="font-medium">Transfer ETH</span>
-                    <span className="text-gray-500">Pending</span>
+// Updated QueuePanel component that fetches real transaction data
+const QueuePanel = ({ safeAddress }: { safeAddress: string }) => {
+    const [pendingTransactions, setPendingTransactions] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState('');
+
+    useEffect(() => {
+        const fetchPendingTransactions = async () => {
+            if (!safeAddress) return;
+
+            setLoading(true);
+            try {
+                const data = await getPendingTransactions(safeAddress);
+                setPendingTransactions(data.results || []);
+                setError('');
+            } catch (err) {
+                console.error("Failed to fetch pending transactions:", err);
+                setError("Failed to load pending transactions");
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchPendingTransactions();
+    }, [safeAddress]);
+
+    if (loading) {
+        return (
+            <div className="bg-white rounded-lg p-4 border border-gray-200">
+                <h2 className="text-xl font-bold mb-3">Transaction Queue</h2>
+                <div className="mb-4">
+                    <MonoLabel label={shorten(safeAddress)} />
                 </div>
-                <div className="mt-1 text-sm">
-                    <p>To: 0x1234...5678</p>
-                    <p>Amount: 0.5 ETH</p>
-                    <p>Created: 2 hours ago</p>
-                </div>
-                <div className="mt-2 flex">
-                    <Button cta="Explain" onClick_={() => console.log("Signing transaction for", safeAddress)} />
-                    <Button cta="Sign TX" onClick_={() => console.log("Signing transaction for", safeAddress)} />
-                </div>
+                <div className="p-4 text-center">Loading pending transactions...</div>
             </div>
-            <div className="p-3 border rounded-md bg-gray-50">
-                <div className="flex justify-between">
-                    <span className="font-medium">Approve Token</span>
-                    <span className="text-gray-500">Needs 1 more signature</span>
+        );
+    }
+
+    if (error) {
+        return (
+            <div className="bg-white rounded-lg p-4 border border-gray-200">
+                <h2 className="text-xl font-bold mb-3">Transaction Queue</h2>
+                <div className="mb-4">
+                    <MonoLabel label={shorten(safeAddress)} />
                 </div>
-                <div className="mt-1 text-sm">
-                    <p>Token: USDC</p>
-                    <p>Spender: 0xabcd...efgh</p>
-                    <p>Created: 1 day ago</p>
-                </div>
-                <div className="mt-2 flex">
-                    <Button cta="Explain TX" onClick_={() => console.log("Signing transaction for", safeAddress)} />
-                    <Button cta="Sign TX" onClick_={() => console.log("Signing transaction for", safeAddress)} />
-                </div>
+                <div className="p-4 text-center text-red-500">{error}</div>
             </div>
+        );
+    }
+
+    return (
+        <div className="bg-white rounded-lg p-4 border border-gray-200">
+            <h2 className="text-xl font-bold mb-3">Transaction Queue</h2>
+            <div className="mb-4">
+                <MonoLabel label={shorten(safeAddress)} />
+            </div>
+            {pendingTransactions.length === 0 ? (
+                <div className="p-4 text-center">No pending transactions found.</div>
+            ) : (
+                <div className="space-y-3">
+                    {pendingTransactions.map((tx: any, index) => (
+                        <div key={index} className="p-3 border rounded-md bg-gray-50">
+                            <div className="flex justify-between">
+                                <span className="font-medium">{tx.type || "Transaction"}</span>
+                                <span className="text-gray-500">{tx.status || "Pending"}</span>
+                            </div>
+                            <div className="mt-1 text-sm">
+                                <p>To: {shorten(tx.to)}</p>
+                                {tx.value && <p>Amount: {tx.value} WEI</p>}
+                                <p>Created: {formatTimeAgo(tx.submissionDate || new Date())}</p>
+                                {tx.confirmationsRequired && (
+                                    <p>Confirmations: {tx.confirmationsSubmitted || 0}/{tx.confirmationsRequired}</p>
+                                )}
+                            </div>
+                            <div className="mt-2 flex gap-1">
+                                <Button cta="Explain Transaction" onClick_={() => console.log("Explaining transaction", tx.safeTxHash)} />
+                                {tx.confirmationsRequired && tx.confirmationsSubmitted < tx.confirmationsRequired ? (
+                                    <Button cta="Sign Transaction" onClick_={() => console.log("Signing transaction", tx.safeTxHash)} />
+                                ) : (
+                                    <Button cta="Execute Transaction" onClick_={() => console.log("Executing transaction", tx.safeTxHash)} />
+                                )}
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            )}
         </div>
-    </div>
-);
+    );
+};
+
+// Helper function to format time ago
+const formatTimeAgo = (date: string) => {
+    const now = new Date();
+    const txDate = new Date(date);
+    const diffInMs = now.getTime() - txDate.getTime();
+    const diffInHours = diffInMs / (1000 * 60 * 60);
+
+    if (diffInHours < 1) {
+        const minutes = Math.floor(diffInMs / (1000 * 60));
+        return `${minutes} minute${minutes !== 1 ? 's' : ''} ago`;
+    } else if (diffInHours < 24) {
+        const hours = Math.floor(diffInHours);
+        return `${hours} hour${hours !== 1 ? 's' : ''} ago`;
+    } else {
+        const days = Math.floor(diffInHours / 24);
+        return `${days} day${days !== 1 ? 's' : ''} ago`;
+    }
+};
 
 export default function Home() {
     // Privy hooks
