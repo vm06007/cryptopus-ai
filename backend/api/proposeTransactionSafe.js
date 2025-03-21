@@ -67,7 +67,7 @@ async function fetchNonce(safeAddr) {
 }
 
 
-async () => {
+(async () => {
   // If nonce not supplied, fetch from Safe service
   if (txNonce === undefined) {
     try {
