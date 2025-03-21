@@ -46,15 +46,7 @@ const HandleCreateSafe = () => {
     console.log("Create new Safe wallet");
 }
 
-const HandleIntegrateAI = (safeAddress: string) => {
-    console.log("Integrate Octopus AI with Safe wallet:", safeAddress);
-}
-
-const HandleShowTransactions = (safeAddress: string) => {
-    console.log("Show transactions for Safe wallet:", safeAddress);
-}
-
-const SafeWalletsList = ({ address }: { address: string }) => {
+const SafeWalletsList = ({ address, onSelectSafe }: { address: string, onSelectSafe: (safeAddress: string, view: string) => void }) => {
     const [safeWallets, setSafeWallets] = useState([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
@@ -136,14 +128,14 @@ const SafeWalletsList = ({ address }: { address: string }) => {
                                 <button
                                     title="Integrate Octopus AI"
                                     className="gap-2 flex hover:bg-gray-100 p-2 rounded-full"
-                                    onClick={() => HandleIntegrateAI(safeAddress)}
+                                    onClick={() => onSelectSafe(safeAddress, 'ai_keys')}
                                 >
                                     <span>🔑</span><span>AI Keys</span>
                                 </button>
                                 <button
                                     title="Show unexecuted transactions"
                                     className="gap-2 flex hover:bg-gray-100 p-2 rounded-full"
-                                    onClick={() => HandleShowTransactions(safeAddress)}
+                                    onClick={() => onSelectSafe(safeAddress, 'queue')}
                                 >
                                     <span>🖊️</span><span>Queue</span>
                                 </button>
@@ -160,6 +152,75 @@ const SafeWalletsList = ({ address }: { address: string }) => {
     );
 };
 
+// Components for the right panel
+const AIKeysPanel = ({ safeAddress }: {safeAddress: string}) => (
+    <div className="bg-white rounded-lg p-4 border border-gray-200">
+        <h2 className="text-xl font-bold mb-3">AI Keys for Safe</h2>
+        <div className="mb-4">
+            <MonoLabel label={shorten(safeAddress)} />
+        </div>
+        <p className="mb-3">Configure AI access permissions for this Safe wallet:</p>
+        <div className="space-y-3">
+            <div className="flex items-center justify-between border-b pb-2">
+                <span>Allow AI to view transactions</span>
+                <input type="checkbox" className="h-5 w-5" defaultChecked />
+            </div>
+            <div className="flex items-center justify-between border-b pb-2">
+                <span>Allow AI to propose transactions</span>
+                <input type="checkbox" className="h-5 w-5" defaultChecked />
+            </div>
+            <div className="flex items-center justify-between border-b pb-2">
+                <span>Allow AI to execute signed transactions</span>
+                <input type="checkbox" className="h-5 w-5" />
+            </div>
+        </div>
+        <div className="mt-4">
+            <Button cta="Save AI Permissions" onClick_={() => console.log("Saving AI permissions for", safeAddress)} />
+        </div>
+    </div>
+);
+
+const QueuePanel = ({ safeAddress }: {safeAddress: string}) => (
+    <div className="bg-white rounded-lg p-4 border border-gray-200">
+        <h2 className="text-xl font-bold mb-3">Transaction Queue</h2>
+        <div className="mb-4">
+            <MonoLabel label={shorten(safeAddress)} />
+        </div>
+        <div className="space-y-3">
+            <div className="p-3 border rounded-md bg-gray-50">
+                <div className="flex justify-between">
+                    <span className="font-medium">Transfer ETH</span>
+                    <span className="text-gray-500">Pending</span>
+                </div>
+                <div className="mt-1 text-sm">
+                    <p>To: 0x1234...5678</p>
+                    <p>Amount: 0.5 ETH</p>
+                    <p>Created: 2 hours ago</p>
+                </div>
+                <div className="mt-2 flex">
+                    <Button cta="Explain" onClick_={() => console.log("Signing transaction for", safeAddress)} />
+                    <Button cta="Sign TX" onClick_={() => console.log("Signing transaction for", safeAddress)} />
+                </div>
+            </div>
+            <div className="p-3 border rounded-md bg-gray-50">
+                <div className="flex justify-between">
+                    <span className="font-medium">Approve Token</span>
+                    <span className="text-gray-500">Needs 1 more signature</span>
+                </div>
+                <div className="mt-1 text-sm">
+                    <p>Token: USDC</p>
+                    <p>Spender: 0xabcd...efgh</p>
+                    <p>Created: 1 day ago</p>
+                </div>
+                <div className="mt-2 flex">
+                    <Button cta="Explain TX" onClick_={() => console.log("Signing transaction for", safeAddress)} />
+                    <Button cta="Sign TX" onClick_={() => console.log("Signing transaction for", safeAddress)} />
+                </div>
+            </div>
+        </div>
+    </div>
+);
+
 export default function Home() {
     // Privy hooks
     const { ready, user, authenticated, login, connectWallet, logout, linkWallet } = usePrivy();
@@ -171,6 +232,14 @@ export default function Home() {
     const { setActiveWallet } = useSetActiveWallet();
 
     const [currentMode, setCurrentMode] = useState('ask_ai');
+    const [selectedSafe, setSelectedSafe] = useState('');
+    const [safeView, setSafeView] = useState(''); // 'ai_keys' or 'queue'
+
+    const handleSelectSafe = (safeAddress: string, view: string) => {
+        setSelectedSafe(safeAddress);
+        setSafeView(view);
+        console.log(`Selected Safe wallet: ${safeAddress}, View: ${view}`);
+    };
 
     if (!ready) {
         return null;
@@ -241,9 +310,13 @@ export default function Home() {
                                 </>
                             )}
 
-                            {/* Display Safe wallets component */}
-                            {address && currentMode === "safe" && <SafeWalletsList address={address} />}
-                            {/*{address && <SafeWalletsList address={address} />}*/}
+                            {/* Display Safe wallets component with onSelectSafe handler */}
+                            {address && currentMode === "safe" && (
+                                <SafeWalletsList
+                                    address={address}
+                                    onSelectSafe={handleSelectSafe}
+                                />
+                            )}
                         </div>
                     </div>
                     <div className='flex flex-col min-h-full w-full max-w-3xl mx-auto px-4'>
@@ -293,7 +366,8 @@ export default function Home() {
                                     <p>Wallet Address: 👛</p>
                                     <div><MonoLabel label={address} /></div>
                                     <p>Wallet Balance:</p>
-                                    <div><Balance /></div>
+                                    <div>
+                                        <Balance />
                                     {/*<Signer />
                                     <SignMessage />
                                     <SignTypedData />
@@ -313,9 +387,22 @@ export default function Home() {
                                     <WalletClient />
                                     <WaitForTransaction />*/}
                                     {/*<ContractWrite />*/}
-                                    {/*<h2 className="mt-6 text-2xl">useDisconnect</h2>*/}
+                                    </div>
                                     <Button onClick_={disconnect} cta="Disconnect from Octopus AI" />
-                                    <h1 className="mt-4 text-2xl font-bold">Your Active Safe</h1>
+
+                                    {/* Display selected Safe wallet information based on the view */}
+                                    {selectedSafe && (
+                                        <div className="mt-4">
+                                            <h1 className="text-2xl font-bold">Your Selected Safe</h1>
+                                            {safeView === 'ai_keys' ? (
+                                                <AIKeysPanel safeAddress={selectedSafe} />
+                                            ) : safeView === 'queue' ? (
+                                                <QueuePanel safeAddress={selectedSafe} />
+                                            ) : (
+                                                <p>Select a view from the Safe wallet options</p>
+                                            )}
+                                        </div>
+                                    )}
                                 </>
                             )}
                         </div>
