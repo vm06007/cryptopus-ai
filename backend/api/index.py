@@ -14,6 +14,8 @@ import aiohttp
 import sqlite3
 import ssl
 
+app = Flask(__name__)
+
 os.environ["SSL_CERT_FILE"] = certifi.where()
 
 from web3 import Web3
@@ -370,9 +372,16 @@ crypto_assistant = CryptoTradingAssistant()
 def home():
     return "Hello, World!"
 
+
 @app.route("/api/v1/storePrivateKey/<path:address>", methods=["GET"])
-async def storePrivateKey(address):
-    return py_store_private_key(address)
+def storePrivateKeyRoute(address: str):
+    did_store = py_store_private_key(address)
+    if did_store:
+        # If storing worked, return 200 OK with success: true
+        return jsonify({"success": True}), 200
+    else:
+        # If storing failed, return 400 or 500 with success: false
+        return jsonify({"success": False}), 400
 
 @app.route("/api/v1/retrievePrivateKey/<path:address>", methods=["GET"])
 async def retrievePrivateKey(address):
