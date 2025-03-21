@@ -12,10 +12,13 @@ from flask import request
 import asyncio
 import aiohttp
 import sqlite3
+import ssl
 
 os.environ["SSL_CERT_FILE"] = certifi.where()
 
 from web3 import Web3
+
+from schema_create import create_schema
 
 load_dotenv()
 
@@ -89,6 +92,7 @@ class CryptoTradingAssistant:
         return response;
 
     async def ask_nilai(self, prompt, model):
+        ssl_context = ssl.create_default_context(cafile=certifi.where())
         headers = {"Authorization": f"Bearer {self.NILAI_API_KEY}"}
         print(f"Prompt calling nilai: {prompt}")
         data = {
@@ -99,7 +103,7 @@ class CryptoTradingAssistant:
             ]
         }
         async with aiohttp.ClientSession() as session:
-            async with session.post(self.NILAI_API_URL, json=data, headers=headers) as response:
+            async with session.post(self.NILAI_API_URL, json=data, headers=headers, ssl=ssl_context) as response:
                 if response.status == 200:
                     reply = (await response.json()).get("choices", [{}])[0].get("message", {}).get("content", "No response received.")
                     logging.info(f"Received response: {reply}")
@@ -110,6 +114,7 @@ class CryptoTradingAssistant:
                     return error_message
 
     async def ask_openrouter(self, prompt, model):
+        ssl_context = ssl.create_default_context(cafile=certifi.where())
         headers = {"Authorization": f"Bearer {self.OPENROUTER_API_KEY}"}
         data = {
             "model": model,
@@ -119,7 +124,7 @@ class CryptoTradingAssistant:
             ]
         }
         async with aiohttp.ClientSession() as session:
-            async with session.post(self.OPENROUTER_API_URL, json=data, headers=headers) as response:
+            async with session.post(self.OPENROUTER_API_URL, json=data, headers=headers, ssl=ssl_context) as response:
                 if response.status == 200:
                     reply = (await response.json()).get("choices", [{}])[0].get("message", {}).get("content", "No response received.")
                     logging.info(f"Received response: {reply}")
@@ -299,10 +304,22 @@ crypto_assistant = CryptoTradingAssistant()
 def home():
     return "Hello, World!"
 
+@app.route("/api/v1/create", methods=["GET", "POST"])
+async def create():
+
+    new_chat = await create_schema("Conversation Starter")
+
+    if request.method == "POST":
+        return jsonify({"chatId": new_chat})
+    else:
+        # handle GET
+        return new_chat
+
 @app.route("/api/v1/about", methods=["GET", "POST"])
 def about():
+    chat_id = "endpoint: "+ str(datetime.now())
     if request.method == "POST":
-        return jsonify({"message": "hello"})
+        return jsonify({"chatId": chat_id})
     else:
         # handle GET
         return "About"
