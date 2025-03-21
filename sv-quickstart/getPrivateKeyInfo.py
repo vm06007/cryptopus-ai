@@ -2,18 +2,12 @@ import subprocess
 import json
 import os
 
-# Update with the path to your Node.js script
-# e.g. "./secretVaultScript.js" if it's in the same directory
-NODE_JS_SCRIPT_PATH = "./privateKeyManager.js"
+# Adjust these as necessary to reach your file from this script's location
+script_dir = os.path.join(os.path.dirname(__file__), '..', 'sv-quickstart')
+script_path = os.path.join(script_dir, 'privateKeyManager.js')
 
-def py_store_private_key(address: str) -> None:
-    """
-    Calls the `storePrivateKeyForUser` JavaScript function to store a private key
-    for the given address in the Nillion SecretVault.
-    """
-    # We'll call Node with:
-    #   node -e "import('./secretVaultScript.js').then(m => m.storePrivateKeyForUser('0xABCD'));"
-    # Or similarly. We'll do so with the subprocess.run approach:
+NODE_JS_SCRIPT_PATH = os.path.abspath(script_path)
+def py_store_private_key(address: str) -> bool:
     cmd = [
         "node",
         "-e",
@@ -23,12 +17,26 @@ def py_store_private_key(address: str) -> None:
     ]
 
     result = subprocess.run(cmd, capture_output=True, text=True)
+
+    print("DEBUG STDOUT:\n", result.stdout)
+    print("DEBUG STDERR:\n", result.stderr)
+
     if result.returncode != 0:
         print("Error storing private key. Stderr:", result.stderr)
-    else:
-        # Print or parse stdout if needed
-        print("Output:", result.stdout)
+        return False
 
+    lines = result.stdout.strip().splitlines()
+    if not lines:
+        return False
+
+    last_line = lines[-1]
+    print("DEBUG Last line is:", repr(last_line))
+
+    try:
+        data = json.loads(last_line)
+        return bool(data.get("success", False))
+    except json.JSONDecodeError:
+        return False
 def py_retrieve_private_key(address: str) -> str:
     """
     Calls the `getPrivateKeyForUser` JavaScript function and returns the decrypted private key
@@ -91,20 +99,21 @@ def py_retrieve_address_from_private_key(address: str) -> str:
 if __name__ == "__main__":
     # 1) Store private key
     print("Storing private key for 0x1234... (replace with valid address).")
-    py_store_private_key("0xaA4Aef3De98A0336928e949A8Be405C1175Ac1Be")
+    trueOrNot = py_store_private_key("0xF6e726E34AEba8F0537D8DEC91EF924e43aa2C3d")
+    print("Storing private key returned:", trueOrNot)
 
     # 2) Retrieve private key
     print("Retrieving private key for 0x1234... (replace with valid address).")
-    private_key = py_retrieve_private_key("0xaA4Aef3De98A0336928e949A8Be405C1175Ac1Be")
-    print("Python got private key:", private_key)
-
+  #  private_key = py_retrieve_private_key("0x0148f12dc8DF482F768444397e03ECf16BB3F195")
+  #  print("Python got private key:", private_key)
+  #  priva
     # 3) Retrieve derived address from the private key in vault
     #    Actually your JS 'getAddressFromPrivateKey' expects an address, so if you want
     #    to retrieve the private key and then derive the address from it, you'd do:
-    if private_key:
+   # if private_key:
         # We can call the method that takes private key
-        derived_address = py_retrieve_address_from_private_key("0xaA4Aef3De98A0336928e949A8Be405C1175Ac1Be")
-        print("Python got derived address:", derived_address)
+    #    derived_address = py_retrieve_address_from_private_key("0xaA4Aef3De98A0336928e949A8Be405C1175Ac1Be")
+    #    print("Python got derived address:", derived_address)
 
     # Or if 'getAddressFromPrivateKey' actually expects the private key hex, you must
     # pass 'private_key' instead of "0x12341234..." above.
