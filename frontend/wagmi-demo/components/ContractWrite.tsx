@@ -3,7 +3,7 @@
 import Wrapper from "components/Wrapper";
 import { shorten, type AddressString } from "lib/utils";
 import { useEffect, useState } from "react";
-import { parseEther } from "viem";
+import { parseUnits } from "viem";
 // import { sepolia } from "viem/chains";
 import { useAccount, useWriteContract, useEnsAddress } from "wagmi";
 
@@ -31,13 +31,30 @@ const ABI = [
     },
 ] as const;
 
-const ContractWrite = ({ to, amount }: { to: string; amount: string }) => {
+const ContractWrite = ({ to, amount, token }: { to: string; amount: string; token: string; }) => {
     // State to store the resolved address
     const [resolvedAddress, setResolvedAddress] = useState<AddressString | undefined>(undefined);
     const [ensLookupName, setEnsLookupName] = useState<string | undefined>(undefined);
 
     // DAI on Mainnet
     const contractAddress: AddressString = "0x6B175474E89094C44Da98b954EedeAC495271d0F";
+    const knownTokens: Record<string, AddressString> = {
+        DAI: "0x6B175474E89094C44Da98b954EedeAC495271d0F",
+        USDC: "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+        USDT: "0xdAC17F958D2ee523a2206206994597C13D831ec7"
+    };
+    const tokenDecimals: Record<string, number> = {
+        [knownTokens.DAI.toLowerCase()]: 18,
+        [knownTokens.USDC.toLowerCase()]: 6,
+        [knownTokens.USDT.toLowerCase()]: 6
+    };
+    let finalAddress: AddressString | undefined;
+    if (token.startsWith("0x") && token.length === 42) {
+        finalAddress = token as AddressString;
+    } else {
+        const upper = token.toUpperCase();
+        finalAddress = knownTokens[upper];
+    }
 
     const { data, error, isError, isPending, writeContract } = useWriteContract();
 
@@ -48,21 +65,15 @@ const ContractWrite = ({ to, amount }: { to: string; amount: string }) => {
             setResolvedAddress(undefined);
             return;
         }
-
-        // Direct address case
         if (to.startsWith("0x")) {
             setEnsLookupName(undefined);
             setResolvedAddress(to as AddressString);
             return;
         }
-
-        // ENS name with .eth
         if (to.includes(".eth")) {
             setEnsLookupName(to);
             return;
         }
-
-        // Potential ENS name without .eth
         setEnsLookupName(`${to}.eth`);
     }, [to]);
 
@@ -97,12 +108,11 @@ const ContractWrite = ({ to, amount }: { to: string; amount: string }) => {
     // Handle transaction submission
     const handleTransfer = () => {
         if (!resolvedAddress || !amount) return;
-
         writeContract?.({
             abi: ABI,
-            address: contractAddress,
+            address: finalAddress || contractAddress,
             functionName: "transfer",
-            args: [resolvedAddress, parseEther(amount)]
+            args: [resolvedAddress, parseUnits(amount, tokenDecimals[finalAddress?.toLowerCase() || ""] ?? 18)]
         });
     };
 

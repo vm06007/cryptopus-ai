@@ -46,7 +46,7 @@ function ChatMessages({ messages, sendInfo, isLoading }) {
                                         <SendTransaction to={sendInfo.To} amount={sendInfo.Amount} />
                                     )}
                                     {!loading && sendInfo?.Amount && !isETH(sendInfo) && (
-                                        <ContractWrite to={sendInfo.To} amount={sendInfo.Amount} />
+                                        <ContractWrite token={sendInfo.Token} to={sendInfo.To} amount={sendInfo.Amount} />
                                     )}
                                 </>
                             ) : (
