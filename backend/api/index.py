@@ -172,7 +172,7 @@ class CryptoTradingAssistant:
             return response
 
         tokenA, tokenB, AmountA, AmountB = swap_info
-        chain = "Ethereum"
+        chain = "🦄 Uniswap"
 
         # Check for tokens in DB
         conn = sqlite3.connect(self.DB_PATH)
@@ -216,16 +216,16 @@ class CryptoTradingAssistant:
                 message = f"🔄 **Swap Request** 🔄\n\n"
                 message += f"SWAP_INFO: {swap_info_object} \n"
                 if AmountA and AmountB:
-                    message += f"You requested that swap: {AmountA} {tokenA} ({tokenA_address}) to {AmountB} {tokenB} ({tokenB_address}) on {chain}"
+                    message += f"You've requested to swap: {AmountA} {tokenA} ({tokenA_address}) to {AmountB} {tokenB} ({tokenB_address}) on {chain}"
                 elif AmountA:
-                    message += f"You requested that swap: {AmountA} {tokenA} ({tokenA_address}) to {tokenB} ({tokenB_address}) on {chain}"
+                    message += f"You've requested to swap: {AmountA} {tokenA} ({tokenA_address}) to {tokenB} ({tokenB_address}) on {chain}"
                 elif AmountB:
-                    message += f"You requested that swap: {tokenA} ({tokenA_address}) to {AmountB} {tokenB} ({tokenB_address}) on {chain}"
+                    message += f"You've requested to swap: {tokenA} ({tokenA_address}) to {AmountB} {tokenB} ({tokenB_address}) on {chain}"
                 else:
-                    message += f"You requested that swap: {tokenA} ({tokenA_address}) to {tokenB} ({tokenB_address}) on {chain}"
+                    message += f"You've requested to swap: {tokenA} ({tokenA_address}) to {tokenB} ({tokenB_address}) on {chain}"
 
                 message += (
-                    "**⚠️ Please double-check details.**"
+                    "\n**⚠️ Please double-check details.**"
                 )
 
         # interaction_data = {"user": request, "assistant": message}
