@@ -67,3 +67,16 @@ async function fetchNonce(safeAddr) {
   const res = await axios.get(url);
   return res.data.nonce;
 }
+
+
+(async () => {
+  // If nonce not supplied, fetch from Safe service
+  if (txNonce === undefined) {
+    try {
+      txNonce = await fetchNonce(safeAddress);
+      console.log(`Fetched current Safe nonce: ${txNonce}`);
+    } catch (err) {
+      console.error('Failed to fetch Safe nonce:', err.response?.data || err.message);
+      process.exit(1);
+    }
+  }
