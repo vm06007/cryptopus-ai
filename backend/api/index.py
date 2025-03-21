@@ -5,6 +5,7 @@ import requests
 os.environ["SSL_CERT_FILE"] = certifi.where()
 import os
 from dotenv import load_dotenv
+from datetime import datetime
 import logging
 from flask import Flask, jsonify
 from flask_cors import CORS
@@ -38,6 +39,50 @@ class CryptoTradingAssistant:
         self.NILAI_API_URL = os.getenv("NILAI_API_URL")
         self.OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY")
         self.OPENROUTER_API_URL = os.getenv("OPENROUTER_API_URL")
+
+    async def process_question(self, question, session_id, model):
+        history = ""
+        context = ""
+        send_into = await self.recognize_send_request_with_ai(question, model)
+        prompt = (
+            f"History: {history}\n\n"
+            f"Context: {context}\n\n"
+            f"SEND_INFO: {send_into}\n\n"
+            f"Question: {question}\n\n"
+            "Instructions: Answer the question with the following format:\n"
+            "- Use bullet points (or emojis as bullet point) to list key features or details.\n"
+            "- Separate ideas into paragraphs for better readability!\n"
+            "- Often include emojis to make the text more engaging.\n"
+            "- If user asked to send funds include SEND_INFO at the end and ensure user you can invoke execution (MUST HAVE AMOUNT TO SEND) \n"
+            "- SEND_INFO: must have all 3 parameters, otherwise remove SEND_INFO from response completely!\n"
+        )
+
+        # response = await self.ask_nilai(prompt, model)
+        response = await self.ask_openrouter(prompt, model)
+        # interaction = {"user": question, "assistant": response}
+        # @TODO: Consider to save interaction to reuse later
+
+        return response
+
+    async def recognize_send_request_with_ai(self, request, model):
+        """Use AI to extract destination from the user's request."""
+        prompt = (
+            "You are a crypto sending assistant. Your task is to extract the following information from the user's request:\n"
+            "1. Token: The token symbol the user wants to send (e.g., WISE, ETH, BTC).\n"
+            "2. Amount: The token amount the user wants to send.\n"
+            "3. Destination: Address or ENS name where user wants to send funds.\n"
+            "IMPORTANT:\n"
+            "- Return the extracted values in this exact format: Token: <Token>, To: <Destination>, Amount: <Amount>\n"
+            "- If any value is missing or not provided by the user, return empty result (do not prefil).\n\n"
+            "Examples:\n"
+            "- 'Send 100 ETH to vitalik.eth: ''\n"
+            "- 'Send 1000 USDC to some-name.eth\n"
+            "- 'I want to send 1,000 USDT to 0x22079A848266A7D2E40CF0fF71a6573D78adcF37\n\n"
+            f"User's request: {request}\n\n"
+            "Return ONLY the extracted values as bullet-points without any extra text."
+        )
+        response = await self.ask_openrouter(prompt, model)
+        return response;
 
     async def ask_nilai(self, prompt, model):
         headers = {"Authorization": f"Bearer {self.NILAI_API_KEY}"}
@@ -80,6 +125,21 @@ class CryptoTradingAssistant:
                     logging.error(error_message)
                     return error_message
 
+    async def ask_ai(self, question: str, input_model: str = ""):
+        try:
+            user_id = "endpoint: "+ str(datetime.now())
+            session_id = f"{user_id}"
+            response = ""
+            if input_model == "ask_nilai":
+                response = await self.process_question(question, session_id, default_nil_ai_model)
+            else:
+                response = await self.process_question(question, session_id, default_openrouter_ai_model)
+
+            return response
+        except Exception as e:
+            logging.error(f"Error in ask_ai: {e}")
+            return "An error occurred while processing your question."
+
 crypto_assistant = CryptoTradingAssistant()
 
 @app.route("/")
@@ -93,6 +153,33 @@ def about():
     else:
         # handle GET
         return "About"
+
+@app.route('/ask_ai/<path:question>', methods=['GET'])
+def ask_ai_get(question):
+    model = request.args.get('model', default_nil_ai_model)
+    if not question:
+        return jsonify({"error": "Question is empty"}), 400
+
+    response = asyncio.run(crypto_assistant.ask_ai(question, model))
+    return jsonify({"response": response})
+
+@app.route('/ask_ai', methods=['POST', 'OPTIONS'])
+def ask_ai_post():
+    # can handle OPTIONS manually:
+    if request.method == 'OPTIONS':
+        return '', 200
+
+    data = request.get_json() or {}
+    question = data.get('question', '')
+    model = data.get('model', 'ask_openrouter')
+
+    if not question:
+        return jsonify({"error": "Question is empty"}), 400
+
+    # Call your async method:
+    response = asyncio.run(crypto_assistant.ask_ai(question, model))
+
+    return jsonify({"response": response})
 
 @app.route("/ask_nilai/<path:question>", methods=["GET"])
 def ask_nilai_get(question):
@@ -115,7 +202,7 @@ def ask_nilai_post():
     if not question:
         return jsonify({"error": "Question is empty"}), 400
 
-    response = asyncio.run(crypto_assistant.ask_nilai(question, model))
+    response = asyncio.run(crypto_assistant.process_question(question, model))
     return jsonify({"response": response})
 
 @app.route("/ask_openrouter/<path:question>", methods=["GET"])

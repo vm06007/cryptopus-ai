@@ -32,7 +32,7 @@ export async function sendChatMessage(chatId: number, message: string, mode: str
     console.log("Sending message:", message);
 
     if (!mode) {
-        mode = "ask_openrouter";
+        mode = "ask_ai";
     }
     const resReal = await fetch(`http://localhost:5000/${mode}`, {
         method: "POST",

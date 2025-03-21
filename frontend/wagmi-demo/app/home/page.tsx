@@ -170,7 +170,7 @@ export default function Home() {
     const { disconnect } = useDisconnect();
     const { setActiveWallet } = useSetActiveWallet();
 
-    const [currentMode, setCurrentMode] = useState('ask_openrouter');
+    const [currentMode, setCurrentMode] = useState('ask_ai');
 
     if (!ready) {
         return null;
