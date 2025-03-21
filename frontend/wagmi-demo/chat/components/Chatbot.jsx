@@ -1,41 +1,64 @@
-import { useState } from "react";
+import React, {
+    useState,
+    forwardRef,
+    useImperativeHandle
+} from "react";
 import { useImmer } from "use-immer";
 import { createChat, sendChatMessage } from "../api";
 import { parseSSEStream } from "../utils";
 import ChatMessages from "../components/ChatMessages";
 import ChatInput from "../components/ChatInput";
 
-function Chatbot({ chatMode }) {
+/**
+ * ChatbotInner is the inner component that we'll wrap with forwardRef
+ * to expose a submitCustomMessage() method.
+ */
+function ChatbotInner({ chatMode }, ref) {
     const [chatId, setChatId] = useState(null);
     const [messages, setMessages] = useImmer([]);
     const [newMessage, setNewMessage] = useState("");
 
-    // We don't need a separate sendInfo state anymore
-    // as we'll attach it directly to the message
+    const isLoading =
+        messages.length && messages[messages.length - 1].loading;
 
-    const isLoading = messages.length && messages[messages.length - 1].loading;
+    /**
+     * This function can either use the user’s typed message (newMessage) or
+     * a custom string (optionalMsg), such as for “Examine Transaction.”
+     */
+    async function submitNewMessage(optionalMsg) {
+        const trimmedMessage = optionalMsg
+            ? optionalMsg
+            : newMessage.trim();
 
-    async function submitNewMessage() {
-        const trimmedMessage = newMessage.trim();
+        // If there's nothing to send, or if we are still waiting on a response,
+        // bail out.
         if (!trimmedMessage || isLoading) return;
 
-        if (!chatMode) {
-            chatMode = "ask_ai";
-        }
+        const actualMode = chatMode || "ask_ai";
 
+        // Add the user message, plus a placeholder for the assistant response
         setMessages((draft) => {
-            draft.push({ role: "user", content: trimmedMessage });
-            draft.push({ role: "assistant", content: "", sources: [], loading: true });
+            draft.push({
+                role: "user",
+                content: trimmedMessage
+            });
+            draft.push({
+                role: "assistant",
+                content: "",
+                sources: [],
+                loading: true
+            });
         });
 
-        setNewMessage("");
+        // If we are using the normal typed flow, clear the message
+        if (!optionalMsg) {
+            setNewMessage("");
+        }
 
         let chatIdOrNew = chatId;
-
         try {
             if (!chatId) {
                 const { id } = await createChat();
-                console.log("Chat ID:", id);
                 setChatId(id);
                 chatIdOrNew = id;
             }
@@ -43,26 +66,28 @@ function Chatbot({ chatMode }) {
             const jsonResponse = await sendChatMessage(
                 chatIdOrNew,
                 trimmedMessage,
-                chatMode
+                actualMode
             );
 
-            // If jsonResponse contains sendInfo, store it in the latest message
+            // If there's a "sendInfo" in the response, attach it
             if (jsonResponse.sendInfo) {
                 setMessages((draft) => {
-                    draft[draft.length - 1].sendInfo = jsonResponse.sendInfo;
+                    draft[draft.length - 1].sendInfo =
+                        jsonResponse.sendInfo;
                 });
             }
 
+            // Parse SSE response in chunks
             for await (const textChunk of parseSSEStream(jsonResponse, 250, 100)) {
                 setMessages((draft) => {
                     draft[draft.length - 1].content += textChunk;
                 });
             }
 
+            // Mark last message as fully loaded
             setMessages((draft) => {
                 draft[draft.length - 1].loading = false;
             });
-
         } catch (err) {
             console.error("Chat Error:", err);
             setMessages((draft) => {
@@ -71,6 +96,16 @@ function Chatbot({ chatMode }) {
             });
         }
     }
+
+    /**
+     * Expose a custom method to the parent via ref:
+     *   chatbotRef.current.submitCustomMessage( ... )
+     */
+    useImperativeHandle(ref, () => ({
+        submitCustomMessage: (message) => {
+            submitNewMessage(message);
+        }
+    }));
 
     return (
         <div className="relative grow flex flex-col gap-6 pt-6">
@@ -87,10 +122,14 @@ function Chatbot({ chatMode }) {
                 newMessage={newMessage}
                 isLoading={isLoading}
                 setNewMessage={setNewMessage}
-                submitNewMessage={submitNewMessage}
+                submitNewMessage={() => submitNewMessage()}
             />
         </div>
     );
 }
 
+/**
+ * Wrap ChatbotInner in forwardRef so we can call the method from a parent component.
+ */
+const Chatbot = forwardRef(ChatbotInner);
 export default Chatbot;
