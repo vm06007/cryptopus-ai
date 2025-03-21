@@ -7,3 +7,7 @@ const dotenv = require('dotenv')
 dotenv.config()
 
 const PRIVATE_KEY = process.env.PRIVATE_KEY
+
+(async () => {
+
+})
