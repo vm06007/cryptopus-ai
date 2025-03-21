@@ -121,3 +121,13 @@ async () => {
     console.error('Error computing safeTxHash:', err.message);
     process.exit(1);
   }
+
+  // Sign the transaction hash
+  let signature;
+  try {
+    const sig = await wallet.signingKey.sign(safeTxHash);
+    signature = ethers.Signature.from(sig).serialized;
+  } catch (err) {
+    console.error('Signing failed:', err.message);
+    process.exit(1);
+  }
