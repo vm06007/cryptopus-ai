@@ -48,6 +48,39 @@ class CryptoTradingAssistant:
         self.DB_PATH = os.path.join(self.BASE_DIR, "tokens.db")
         self.init_db()
 
+    async def process_question_safe(self, question, session_id, model):
+        #@TODO: retrieve previous conversation
+        history = ""
+        context = ""
+        # send_into = await self.recognize_send_request_with_ai(question, model)
+        prompt = (
+            f"History: {history}\n\n"
+            f"Context: {context}\n\n"
+            #f"SEND_INFO: {send_into}\n\n"
+            f"Question: {question}\n\n"
+            "You are a crypto security assistant Octopus AI. Your task is to analyze SAFE wallet (multisig wallet) pending transactions and determine if its safe to execute them:\n"
+            "Instructions: Answer the question with the following format:\n"
+            "Check if there are transaction user is curious about:\n"
+            "Analyze byte-data of the transaction and function selectors:\n"
+            "Determine if it is safe to execute these transactions check with user about destinatino address:\n"
+            "Make sure to be aware of units usually all values with 18 decimal precision when analyzing transaction:\n"
+            "- Use bullet points (or emojis as bullet point) to list key features or details.\n"
+            "- Separate ideas into paragraphs for better readability!\n"
+            "- Often include emojis to make the text more engaging.\n"
+        )
+
+        response = ""
+        if (model == default_nil_ai_model):
+            response = await self.ask_nilai(prompt, model)
+        else:
+            response = await self.ask_openrouter(prompt, model)
+
+        # interaction = {"user": question, "assistant": response}
+        # @TODO: Consider to save interaction to reuse later
+        # nillion.store(interaction)
+
+        return response
+
     async def process_question(self, question, session_id, model):
         #@TODO: retrieve previous conversation
         history = ""
@@ -151,6 +184,21 @@ class CryptoTradingAssistant:
                 response = await self.process_question(question, session_id, default_nil_ai_model)
             else:
                 response = await self.process_question(question, session_id, default_openrouter_ai_model)
+
+            return response
+        except Exception as e:
+            logging.error(f"Error in ask_ai: {e}")
+            return "An error occurred while processing your question."
+
+    async def ask_ai_safe(self, question: str, input_model: str = ""):
+        try:
+            user_id = "endpoint: "+ str(datetime.now())
+            session_id = f"{user_id}"
+            response = ""
+            if input_model == "ask_nilai":
+                response = await self.process_question_safe(question, session_id, default_nil_ai_model)
+            else:
+                response = await self.process_question_safe(question, session_id, default_openrouter_ai_model)
 
             return response
         except Exception as e:
@@ -445,7 +493,7 @@ def ask_safe():
     if not question:
         return jsonify({"error": "Question is empty"}), 400
 
-    response = asyncio.run(crypto_assistant.ask_ai(question, 'ask_nilai'))
+    response = asyncio.run(crypto_assistant.ask_ai_safe(question, 'ask_nilai'))
     return jsonify({"response": response})
 
 @app.route("/api/v1/owners/<address>/safes", methods=["GET"])
