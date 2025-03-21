@@ -57,6 +57,7 @@ class CryptoTradingAssistant:
             f"Context: {context}\n\n"
             f"SEND_INFO: {send_into}\n\n"
             f"Question: {question}\n\n"
+            "You are a crypto sending assistant Octopus AI. Your task is to extract the following information from the user's request:\n"
             "Instructions: Answer the question with the following format:\n"
             "- Use bullet points (or emojis as bullet point) to list key features or details.\n"
             "- Separate ideas into paragraphs for better readability!\n"
@@ -76,7 +77,7 @@ class CryptoTradingAssistant:
     async def recognize_send_request_with_ai(self, request, model):
         """Use AI to extract destination from the user's request."""
         prompt = (
-            "You are a crypto sending assistant. Your task is to extract the following information from the user's request:\n"
+            "You are a crypto sending assistant Octopus AI. Your task is to extract the following information from the user's request:\n"
             "1. Token: The token symbol the user wants to send (e.g., WISE, ETH, BTC).\n"
             "2. Amount: The token amount the user wants to send.\n"
             "3. Destination: Address or ENS name where user wants to send funds.\n"
