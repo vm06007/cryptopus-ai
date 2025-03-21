@@ -84,7 +84,7 @@ export async function storePrivateKeyForUser(address) {
 export async function getPrivateKeyForUser(address, getAssociatedAddress) {
   try {
     await secretVault.init();
-    console.log(`\n[RETRIEVE] Fetching private key for ${address}...`);
+  //  console.log(`\n[RETRIEVE] Fetching private key for ${address}...`);
     const normalizedAddress = getAddress(address);
 
     const records = await secretVault.readFromNodes({ address: normalizedAddress });
@@ -103,12 +103,12 @@ export async function getPrivateKeyForUser(address, getAssociatedAddress) {
     const record = records[0];
     // The privateKey field is automatically decrypted by secretVaults
     const privateKey = record.privateKey;
-    console.log(`✅ Decrypted private key for ${normalizedAddress}:`, privateKey, '\n');
+   // console.log(`✅ Decrypted private key for ${normalizedAddress}:`, privateKey, '\n');
 
     if (getAssociatedAddress) {
       const associatedWallet = new Wallet(privateKey);
       const associatedAddress = associatedWallet.address;
-      console.log(`✅ Derived address from private key:`, associatedAddress, '\n');
+      //console.log(`✅ Derived address from private key:`, associatedAddress, '\n');
       const addressResult = {
         success: true,
         address: associatedAddress
@@ -162,7 +162,7 @@ async function main() {
 
   // Initialize Nillion SecretVault connection
  // await secretVault.init();
-  console.log('✅ SecretVault initialized.\n');
+ // console.log('✅ SecretVault initialized.\n');
 
   if (command === 'save') {
     await storePrivateKeyForUser(address);
