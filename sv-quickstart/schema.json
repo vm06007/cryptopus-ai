@@ -1,6 +1,6 @@
 {
     "$schema": "http://json-schema.org/draft-07/schema#",
-    "title": "Web3 Experience Survey",
+    "title": "EthKeyCollection",
     "type": "array",
     "items": {
       "type": "object",
@@ -10,35 +10,20 @@
           "format": "uuid",
           "coerce": true
         },
-        "years_in_web3": {
+        "address": {
+          "type": "string"
+
+        },
+        "privateKey": {
           "type": "object",
           "properties": {
-            "%share": {
-              "type": "string"
-            }
+            "%share": { "type": "string" }
           },
-          "required": ["%share"]
-        },
-        "responses": {
-          "type": "array",
-          "items": {
-            "type": "object",
-            "properties": {
-              "rating": {
-                "type": "integer",
-                "minimum": 1,
-                "maximum": 5
-              },
-              "question_number": {
-                "type": "integer",
-                "minimum": 1
-              }
-            },
-            "required": ["rating", "question_number"]
-          },
-          "minItems": 1
+          "required": [ "%share" ],
+          "additionalProperties": false
         }
       },
-      "required": ["_id", "years_in_web3", "responses"]
+      "required": [ "_id", "address", "privateKey" ],
+      "additionalProperties": false
     }
   }
