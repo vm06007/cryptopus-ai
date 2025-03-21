@@ -131,3 +131,24 @@ async () => {
     console.error('Signing failed:', err.message);
     process.exit(1);
   }
+
+
+  // Build the payload
+  const payload = {
+    to: destination,
+    value: valueStr,
+    data: data === '' ? null : data,
+    operation: 0,
+    gasToken,
+    safeTxGas: safeTxGasStr,
+    baseGas: baseGasStr,
+    gasPrice: gasPriceStr,
+    refundReceiver,
+    nonce: txNonce,
+    contractTransactionHash: safeTxHash,
+    sender: wallet.address,
+    signature
+  };
+
+  console.log('Proposing TX to Safe Service with payload:', payload);
+
