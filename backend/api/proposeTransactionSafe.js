@@ -102,3 +102,22 @@ async () => {
     }
   ];
 
+  // Compute transaction hash
+  let safeTxHash;
+  try {
+    safeTxHash = await safeContract.getTransactionHash(
+      destination,
+      valueStr,
+      data || '0x',
+      0,             // operation
+      safeTxGasStr,
+      baseGasStr,
+      gasPriceStr,
+      gasToken,
+      refundReceiver,
+      txNonce
+    );
+  } catch (err) {
+    console.error('Error computing safeTxHash:', err.message);
+    process.exit(1);
+  }
