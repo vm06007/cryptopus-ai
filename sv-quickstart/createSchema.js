@@ -4,17 +4,15 @@ import schema from './schema.json' assert { type: 'json' };
 
 async function main() {
   try {
-    const org = new SecretVaultWrapper(
-      orgConfig.nodes,
-      orgConfig.orgCredentials
-    );
-    await org.init();
+    // Initialize SecretVault client with org nodes and credentials
+    const sv = new SecretVaultWrapper(orgConfig.nodes, orgConfig.orgCredentials);
+    await sv.init();
 
-    // create a new collectionschema
-    const newSchema = await org.createSchema(schema, 'Web3 Experience Survey');
-    console.log('📚 New Schema:', newSchema);
+    // Create the schema (collection) on SecretVault
+    const newSchema = await sv.createSchema(schema, 'Private Key Store');
+    console.log('Created Schema ID:', newSchema);
   } catch (error) {
-    console.error('❌ Failed to use SecretVaultWrapper:', error.message);
+    console.error('❌ Failed to create schema:', error.message);
     process.exit(1);
   }
 }
