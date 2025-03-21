@@ -1,19 +1,19 @@
 'use client';
 
-import type {ReactNode} from 'react';
+import type { ReactNode } from 'react';
 
 type Props = {
-  title: string;
-  children: ReactNode;
+    title: string;
+    children: ReactNode;
 };
 
-const Wrapper = ({title, children}: Props) => {
-  return (
-    <>
-      <h2 className="mt-6 text-2xl">{title}</h2>
-      {children}
-    </>
-  );
+const Wrapper = ({ title, children }: Props) => {
+    return (
+        <>
+            {title && (<h2 className="mt-6 text-2xl">{title}</h2>)}
+            {children}
+        </>
+    );
 };
 
 export default Wrapper;

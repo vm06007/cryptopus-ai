@@ -570,25 +570,27 @@ const ContractWrite = () => {
 
   if (!chain) {
     return (
-      <Wrapper title="useContractWrite">
+      <Wrapper title="">
         <p>Loading...</p>
       </Wrapper>
     );
   }
 
+  /*
   if (chain.id !== sepolia.id) {
     return (
-      <Wrapper title="useContractWrite">
+      <Wrapper title="">
         <p>Unsupported network. Please switch to Sepolia.</p>
       </Wrapper>
     );
   }
+  */
 
   return (
-    <Wrapper title="useContractWrite">
-      <div className="rounded bg-red-400 px-2 py-1 text-sm text-white">
+    <Wrapper title="">
+      {/*<div className="rounded bg-red-400 px-2 py-1 text-sm text-white">
         We recommend doing this on sepolia.
-      </div>
+      </div>*/}
       {data && !isError && (
         <p>
           Transaction hash: <MonoLabel label={shorten(data)} />
@@ -607,7 +609,7 @@ const ContractWrite = () => {
               value: parseEther('0.001'),
             })
           }
-          cta="Mint"
+          cta="Confirm Transaction"
         />
       )}
     </Wrapper>
