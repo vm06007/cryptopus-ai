@@ -154,6 +154,17 @@ async () => {
 
   try {
     const postUrl = `https://safe-transaction-arbitrum.safe.global/api/v2/safes/${safeAddress}/multisig-transactions/`;
+    const res = await axios.post(postUrl, payload, {
+      headers: { 'Content-Type': 'application/json' }
+    });
+    console.log('Transaction proposed successfully!');
+    console.log('Response SafeTxHash:', res.data.safeTxHash || res.data.contractTransactionHash);
+    console.log('API response (summary):', {
+      status: res.status,
+      trusted: res.data.trusted,
+      nonce: res.data.nonce,
+      transactionId: res.data.id
+    });
   } catch (err) {
   }
 })
