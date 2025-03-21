@@ -6,9 +6,16 @@ import userIcon from "../assets/images/user.svg";
 import errorIcon from "../assets/images/error.svg";
 import Image from "next/image";
 import SendTransaction from "../../components/SendTransaction";
+import ContractWrite from "../../components/ContractWrite";
 
 function ChatMessages({ messages, sendInfo, isLoading }) {
+
     const scrollContentRef = useAutoScroll(isLoading);
+
+    const isETH = (sendInfo) => {
+        return sendInfo.Token === "ETH";
+    }
+
     return (
         <div ref={scrollContentRef} className="grow space-y-4">
             {messages.map(({ role, content, loading, error }, idx) => (
@@ -35,8 +42,11 @@ function ChatMessages({ messages, sendInfo, isLoading }) {
                                             <Spinner />
                                         </div>
                                     )}
-                                    {!loading && sendInfo?.Amount && (
+                                    {!loading && sendInfo?.Amount && isETH(sendInfo) && (
                                         <SendTransaction to={sendInfo.To} amount={sendInfo.Amount} />
+                                    )}
+                                    {!loading && sendInfo?.Amount && !isETH(sendInfo) && (
+                                        <ContractWrite to={sendInfo.To} amount={sendInfo.Amount} />
                                     )}
                                 </>
                             ) : (

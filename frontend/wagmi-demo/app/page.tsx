@@ -13,7 +13,7 @@ import EnsName from 'components/EnsName';
 import EnsResolver from 'components/EnsResolver';
 import FeeData from 'components/FeeData';
 import PublicClient from 'components/PublicClient';
-import SendTransaction from 'components/SendTransaction';
+// import SendTransaction from 'components/SendTransaction';
 import SignMessage from 'components/SignMessage';
 import SignTypedData from 'components/SignTypedData';
 import Signer from 'components/Signer';
@@ -163,7 +163,7 @@ export default function Home() {
                 <EnsResolver />
                 <SwitchNetwork />
                 <BlockNumber />
-                <SendTransaction />
+                {/*<SendTransaction />*/}
                 <ContractRead />
                 <ContractReads />
                 <ContractWrite />
