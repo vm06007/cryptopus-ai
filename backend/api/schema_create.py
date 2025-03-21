@@ -1,42 +1,41 @@
-"""Schema Create example using the SecretVault wrapper"""
+"""Schema Create example with SSL certificate verification disabled."""
 
 import asyncio
 import json
 import sys
-import certifi
 import os
+import ssl
 
-os.environ["SSL_CERT_FILE"] = certifi.where()
+# Disable SSL verification (WARNING: Insecure for production)
+ssl._create_default_https_context = ssl._create_unverified_context
 
 from secretvaults import SecretVaultWrapper
 from org_config import org_config
 
-# Load the schema from schema_match.json
+# Load your schema from file
 with open("schema_store.json", "r", encoding="utf8") as schema_file:
     schema = json.load(schema_file)
 
-
-async def main():
+async def create_schema(schema_name: str = "Octopus AI Chats"):
     """
-    Main function to initialize the SecretVaultWrapper and create a new schema.
+    Creates a new schema using the SecretVaultWrapper and returns the newly created schema.
     """
     try:
-        # Initialize the SecretVaultWrapper instance with the org configuration
         org = SecretVaultWrapper(org_config["nodes"], org_config["org_credentials"])
         await org.init()
-
-        # Create a new schema
-        new_schema = await org.create_schema(schema, "Web3 Experience Survey")
+        new_schema = await org.create_schema(schema, schema_name)
         print("📚 New Schema:", new_schema)
-
-        # Optional: Delete the schema
-        # await org.delete_schema(new_schema)
-
+        return new_schema
     except RuntimeError as error:
         print(f"❌ Failed to use SecretVaultWrapper: {str(error)}")
         sys.exit(1)
 
+def main():
+    """
+    Synchronous entry point for create_schema.
+    """
+    result = asyncio.run(create_schema("Octopus AI Chats"))
+    return result
 
-# Run the async main function
 if __name__ == "__main__":
-    asyncio.run(main())
+    main()

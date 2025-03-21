@@ -9,7 +9,9 @@ function Chatbot({ chatMode }) {
     const [chatId, setChatId] = useState(null);
     const [messages, setMessages] = useImmer([]);
     const [newMessage, setNewMessage] = useState("");
-    const [sendInfo, setSendInfo] = useState(null);
+
+    // We don't need a separate sendInfo state anymore
+    // as we'll attach it directly to the message
 
     const isLoading = messages.length && messages[messages.length - 1].loading;
 
@@ -17,7 +19,11 @@ function Chatbot({ chatMode }) {
         const trimmedMessage = newMessage.trim();
         if (!trimmedMessage || isLoading) return;
 
-        setMessages(draft => {
+        if (!chatMode) {
+            chatMode = "ask_ai";
+        }
+
+        setMessages((draft) => {
             draft.push({ role: "user", content: trimmedMessage });
             draft.push({ role: "assistant", content: "", sources: [], loading: true });
         });
@@ -25,8 +31,6 @@ function Chatbot({ chatMode }) {
         setNewMessage("");
 
         let chatIdOrNew = chatId;
-
-        // console.log(chatId, "chatId");
 
         try {
             if (!chatId) {
@@ -36,35 +40,32 @@ function Chatbot({ chatMode }) {
                 chatIdOrNew = id;
             }
 
-            if (!chatMode) {
-                chatMode = "ask_ai";
-            }
-
             const jsonResponse = await sendChatMessage(
                 chatIdOrNew,
                 trimmedMessage,
                 chatMode
             );
 
+            // If jsonResponse contains sendInfo, store it in the latest message
             if (jsonResponse.sendInfo) {
-                setSendInfo(jsonResponse.sendInfo);
-            } else {
-                setSendInfo(null);
+                setMessages((draft) => {
+                    draft[draft.length - 1].sendInfo = jsonResponse.sendInfo;
+                });
             }
 
             for await (const textChunk of parseSSEStream(jsonResponse, 500, 100)) {
-                setMessages(draft => {
+                setMessages((draft) => {
                     draft[draft.length - 1].content += textChunk;
                 });
             }
 
-            setMessages(draft => {
+            setMessages((draft) => {
                 draft[draft.length - 1].loading = false;
             });
 
         } catch (err) {
             console.error("Chat Error:", err);
-            setMessages(draft => {
+            setMessages((draft) => {
                 draft[draft.length - 1].loading = false;
                 draft[draft.length - 1].error = true;
             });
@@ -81,7 +82,6 @@ function Chatbot({ chatMode }) {
             <ChatMessages
                 messages={messages}
                 isLoading={isLoading}
-                sendInfo={sendInfo}
             />
             <ChatInput
                 newMessage={newMessage}

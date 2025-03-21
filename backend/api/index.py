@@ -12,10 +12,13 @@ from flask import request
 import asyncio
 import aiohttp
 import sqlite3
+import ssl
 
 os.environ["SSL_CERT_FILE"] = certifi.where()
 
 from web3 import Web3
+
+from schema_create import create_schema
 
 load_dotenv()
 
@@ -89,6 +92,7 @@ class CryptoTradingAssistant:
         return response;
 
     async def ask_nilai(self, prompt, model):
+        ssl_context = ssl.create_default_context(cafile=certifi.where())
         headers = {"Authorization": f"Bearer {self.NILAI_API_KEY}"}
         print(f"Prompt calling nilai: {prompt}")
         data = {
@@ -99,7 +103,7 @@ class CryptoTradingAssistant:
             ]
         }
         async with aiohttp.ClientSession() as session:
-            async with session.post(self.NILAI_API_URL, json=data, headers=headers) as response:
+            async with session.post(self.NILAI_API_URL, json=data, headers=headers, ssl=ssl_context) as response:
                 if response.status == 200:
                     reply = (await response.json()).get("choices", [{}])[0].get("message", {}).get("content", "No response received.")
                     logging.info(f"Received response: {reply}")
@@ -110,6 +114,7 @@ class CryptoTradingAssistant:
                     return error_message
 
     async def ask_openrouter(self, prompt, model):
+        ssl_context = ssl.create_default_context(cafile=certifi.where())
         headers = {"Authorization": f"Bearer {self.OPENROUTER_API_KEY}"}
         data = {
             "model": model,
@@ -119,7 +124,7 @@ class CryptoTradingAssistant:
             ]
         }
         async with aiohttp.ClientSession() as session:
-            async with session.post(self.OPENROUTER_API_URL, json=data, headers=headers) as response:
+            async with session.post(self.OPENROUTER_API_URL, json=data, headers=headers, ssl=ssl_context) as response:
                 if response.status == 200:
                     reply = (await response.json()).get("choices", [{}])[0].get("message", {}).get("content", "No response received.")
                     logging.info(f"Received response: {reply}")
@@ -167,7 +172,7 @@ class CryptoTradingAssistant:
             return response
 
         tokenA, tokenB, AmountA, AmountB = swap_info
-        chain = "Ethereum"
+        chain = "🦄 Uniswap"
 
         # Check for tokens in DB
         conn = sqlite3.connect(self.DB_PATH)
@@ -211,16 +216,16 @@ class CryptoTradingAssistant:
                 message = f"🔄 **Swap Request** 🔄\n\n"
                 message += f"SWAP_INFO: {swap_info_object} \n"
                 if AmountA and AmountB:
-                    message += f"You requested that swap: {AmountA} {tokenA} ({tokenA_address}) to {AmountB} {tokenB} ({tokenB_address}) on {chain}"
+                    message += f"You've requested to swap: {AmountA} {tokenA} ({tokenA_address}) to {AmountB} {tokenB} ({tokenB_address}) on {chain}"
                 elif AmountA:
-                    message += f"You requested that swap: {AmountA} {tokenA} ({tokenA_address}) to {tokenB} ({tokenB_address}) on {chain}"
+                    message += f"You've requested to swap: {AmountA} {tokenA} ({tokenA_address}) to {tokenB} ({tokenB_address}) on {chain}"
                 elif AmountB:
-                    message += f"You requested that swap: {tokenA} ({tokenA_address}) to {AmountB} {tokenB} ({tokenB_address}) on {chain}"
+                    message += f"You've requested to swap: {tokenA} ({tokenA_address}) to {AmountB} {tokenB} ({tokenB_address}) on {chain}"
                 else:
-                    message += f"You requested that swap: {tokenA} ({tokenA_address}) to {tokenB} ({tokenB_address}) on {chain}"
+                    message += f"You've requested to swap: {tokenA} ({tokenA_address}) to {tokenB} ({tokenB_address}) on {chain}"
 
                 message += (
-                    "**⚠️ Please double-check details.**"
+                    "\n**⚠️ Please double-check details.**"
                 )
 
         # interaction_data = {"user": request, "assistant": message}
@@ -299,10 +304,22 @@ crypto_assistant = CryptoTradingAssistant()
 def home():
     return "Hello, World!"
 
+@app.route("/api/v1/create", methods=["GET", "POST"])
+async def create():
+
+    new_chat = await create_schema("Conversation Starter")
+
+    if request.method == "POST":
+        return jsonify({"chatId": new_chat})
+    else:
+        # handle GET
+        return new_chat
+
 @app.route("/api/v1/about", methods=["GET", "POST"])
 def about():
+    chat_id = "endpoint: "+ str(datetime.now())
     if request.method == "POST":
-        return jsonify({"message": "hello"})
+        return jsonify({"chatId": chat_id})
     else:
         # handle GET
         return "About"

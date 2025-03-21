@@ -3,6 +3,8 @@ const VERSION = "v1";
 
 export async function createChat() {
     const resReal = await fetch(`${BASE_URL}/api/${VERSION}/about`, {
+    // const resReal = await fetch(`${BASE_URL}/api/${VERSION}/create`, {
+    // when SSL issue resolved call NILLION
         method: "POST",
         headers: { "Content-Type": "application/json" }
     });
@@ -12,7 +14,7 @@ export async function createChat() {
     console.log(dataReal);
 
     const data = {
-        id: "123"
+        id: dataReal.chatId
     }
     const res = {
         ok: true,
