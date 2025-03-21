@@ -130,14 +130,14 @@ const SafeWalletsList = ({ address, onSelectSafe }: { address: string, onSelectS
                                     className="gap-2 flex hover:bg-gray-100 p-2 rounded-full"
                                     onClick={() => onSelectSafe(safeAddress, 'ai_keys')}
                                 >
-                                    <span>🔑</span><span>AI Keys</span>
+                                    <span>🔑</span><span>AI Keys Permission</span>
                                 </button>
                                 <button
                                     title="Show unexecuted transactions"
                                     className="gap-2 flex hover:bg-gray-100 p-2 rounded-full"
                                     onClick={() => onSelectSafe(safeAddress, 'queue')}
                                 >
-                                    <span>🖊️</span><span>Queue</span>
+                                    <span>🖊️</span><span>Transaction Queue</span>
                                 </button>
                             </div>
                         </div>
@@ -155,11 +155,10 @@ const SafeWalletsList = ({ address, onSelectSafe }: { address: string, onSelectS
 // Components for the right panel
 const AIKeysPanel = ({ safeAddress }: {safeAddress: string}) => (
     <div className="bg-white rounded-lg p-4 border border-gray-200">
-        <h2 className="text-xl font-bold mb-3">AI Keys for Safe</h2>
+        <h2 className="text-xl font-bold mb-3">AI Keys Permission for Safe</h2>
         <div className="mb-4">
             <MonoLabel label={shorten(safeAddress)} />
         </div>
-        <p className="mb-3">Configure AI access permissions for this Safe wallet:</p>
         <div className="space-y-3">
             <div className="flex items-center justify-between border-b pb-2">
                 <span>Allow AI to view transactions</span>
@@ -251,12 +250,12 @@ const QueuePanel = ({ safeAddress }: { safeAddress: string }) => {
                                 {tx.value && <p>Amount: {tx.value} WEI</p>}
                                 <p>Created: {formatTimeAgo(tx.submissionDate || new Date())}</p>
                                 {tx.confirmationsRequired && (
-                                    <p>Confirmations: {tx.confirmationsSubmitted || 0}/{tx.confirmationsRequired}</p>
+                                    <p>Confirmations: {tx.confirmations.length || 0}/{tx.confirmationsRequired}</p>
                                 )}
                             </div>
                             <div className="mt-2 flex gap-1">
                                 <Button cta="Explain Transaction" onClick_={() => console.log("Explaining transaction", tx.safeTxHash)} />
-                                {tx.confirmationsRequired && tx.confirmationsSubmitted < tx.confirmationsRequired ? (
+                                {tx.confirmationsRequired && tx.confirmations.length < tx.confirmationsRequired ? (
                                     <Button cta="Sign Transaction" onClick_={() => console.log("Signing transaction", tx.safeTxHash)} />
                                 ) : (
                                     <Button cta="Execute Transaction" onClick_={() => console.log("Executing transaction", tx.safeTxHash)} />
