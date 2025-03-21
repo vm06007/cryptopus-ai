@@ -32,8 +32,7 @@ CORS(app, resources={r"/*/*": {
 default_nil_ai_model = "meta-llama/Llama-3.1-8B-Instruct"
 default_openrouter_ai_model = "anthropic/claude-3-haiku:beta"
 safe_api_url_v1 = "https://safe-transaction-mainnet.safe.global/api/v1"
-safe_api_url_v2 = "https://safe-transaction-mainnet.safe.global/api/v2/safes"
-
+safe_api_url_v2 = "https://safe-transaction-mainnet.safe.global/api/v2"
 
 class CryptoTradingAssistant:
     def __init__(self):
@@ -149,7 +148,7 @@ class CryptoTradingAssistant:
 
         # @TODO: use wallet address to identify user (pass to function)
         user_id = 'endpoint: '+ str(datetime.now())
-        # @TODO: add history concep
+        # @TODO: add history concept
         history = ""
 
         swap_info = await self.recognize_swap_request_with_ai(request, default_openrouter_ai_model)
@@ -425,7 +424,7 @@ def get_pending_txs(address):
             return jsonify({"error": "Invalid Ethereum address format"}), 400
 
         # Basic Safe API request to get pending transactions
-        response = requests.get(f"{safe_api_url_v2}/{address}/multisig-transactions/?executed=false")
+        response = requests.get(f"{safe_api_url_v2}/safes/{address}/multisig-transactions/?executed=false")
 
         if response.status_code != 200:
             return jsonify({"error": f"Safe API error: {response.status_code}"}), response.status_code
