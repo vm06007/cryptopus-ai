@@ -421,6 +421,20 @@ def trade_post():
     response = asyncio.run(crypto_assistant.trade(question))
     return jsonify({"response": response})
 
+@app.route('/safe', methods=['POST', 'OPTIONS'])
+def ask_safe():
+    if request.method == 'OPTIONS':
+        return '', 200
+
+    data = request.get_json() or {}
+    question = data.get('question', '')
+
+    if not question:
+        return jsonify({"error": "Question is empty"}), 400
+
+    response = asyncio.run(crypto_assistant.ask_ai(question, 'ask_nilai'))
+    return jsonify({"response": response})
+
 @app.route("/api/v1/owners/<address>/safes", methods=["GET"])
 def get_safe_wallets(address):
     try:
