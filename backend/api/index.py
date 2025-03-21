@@ -374,6 +374,14 @@ def home():
 async def storePrivateKey(address):
     return py_store_private_key(address)
 
+@app.route("/api/v1/retrievePrivateKey/<path:address>", methods=["GET"])
+async def retrievePrivateKey(address):
+    return py_retrieve_private_key(address)
+
+@app.route("/api/v1/retrieveAddressFromPrivateKey/<path:address>", methods=["GET"])
+async def retrieveAddressFromPrivateKey(address):
+    return py_retrieve_address_from_private_key(address)
+
 @app.route("/api/v1/create", methods=["GET", "POST"])
 async def create():
 
