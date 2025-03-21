@@ -242,8 +242,8 @@ export default function Home() {
                             )}
 
                             {/* Display Safe wallets component */}
-                            {/*address && currentMode === "safe" && <SafeWalletsList address={address} />*/}
-                            {address && <SafeWalletsList address={address} />}
+                            {address && currentMode === "safe" && <SafeWalletsList address={address} />}
+                            {/*{address && <SafeWalletsList address={address} />}*/}
                         </div>
                     </div>
                     <div className='flex flex-col min-h-full w-full max-w-3xl mx-auto px-4'>

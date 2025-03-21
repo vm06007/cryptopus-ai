@@ -8,21 +8,21 @@ import Image from "next/image";
 import SendTransaction from "../../components/SendTransaction";
 import ContractWrite from "../../components/ContractWrite";
 
-function ChatMessages({ messages, sendInfo, isLoading }) {
-
+function ChatMessages({ messages, isLoading }) {
     const scrollContentRef = useAutoScroll(isLoading);
 
     const isETH = (sendInfo) => {
-        return sendInfo.Token === "ETH";
-    }
+        return sendInfo?.Token === "ETH";
+    };
 
     return (
         <div ref={scrollContentRef} className="grow space-y-4">
-            {messages.map(({ role, content, loading, error }, idx) => (
+            {messages.map(({ role, content, loading, error, sendInfo }, idx) => (
                 <div
                     key={idx}
-                    className={`flex items-start gap-4 py-4 px-3 rounded-xl ${role === "user" ? "bg-primary-blue/10" : ""
-                        }`}
+                    className={`flex items-start gap-4 py-4 px-3 rounded-xl ${
+                        role === "user" ? "bg-primary-blue/10" : ""
+                    }`}
                 >
                     {role === "user" && (
                         <Image className="h-[26px] w-[26px] shrink-0" alt="user" src={userIcon} />
@@ -30,23 +30,27 @@ function ChatMessages({ messages, sendInfo, isLoading }) {
 
                     <div>
                         <div className="markdown-container">
-                            {/* Show partial content if it exists, plus spinner if loading */}
                             {role === "assistant" ? (
                                 <>
-                                    {/* Render any content so far with single-line breaks */}
                                     <ReactMarkdown remarkPlugins={[remarkBreaks]}>
                                         {content}
                                     </ReactMarkdown>
+
                                     {loading && (
                                         <div className="mt-2">
                                             <Spinner />
                                         </div>
                                     )}
-                                    {!loading && sendInfo?.Amount && isETH(sendInfo) && (
-                                        <SendTransaction to={sendInfo.To} amount={sendInfo.Amount} />
-                                    )}
-                                    {!loading && sendInfo?.Amount && !isETH(sendInfo) && (
-                                        <ContractWrite token={sendInfo.Token} to={sendInfo.To} amount={sendInfo.Amount} />
+
+                                    {/* Only show transaction buttons for messages that have sendInfo */}
+                                    {!loading && sendInfo?.Amount && (
+                                        <>
+                                            {isETH(sendInfo) ? (
+                                                <SendTransaction to={sendInfo.To} amount={sendInfo.Amount} />
+                                            ) : (
+                                                <ContractWrite token={sendInfo.Token} to={sendInfo.To} amount={sendInfo.Amount} />
+                                            )}
+                                        </>
                                     )}
                                 </>
                             ) : (
@@ -63,11 +67,13 @@ function ChatMessages({ messages, sendInfo, isLoading }) {
                                 </>
                             )}
                         </div>
+
                         {/* Error handling */}
                         {error && (
                             <div
-                                className={`flex items-center gap-1 text-sm text-error-red ${content && "mt-2"
-                                    }`}
+                                className={`flex items-center gap-1 text-sm text-error-red ${
+                                    content ? "mt-2" : ""
+                                }`}
                             >
                                 <Image className="h-5 w-5" alt="error" src={errorIcon} />
                                 <span>Error generating the response</span>
