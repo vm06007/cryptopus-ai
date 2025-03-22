@@ -463,13 +463,15 @@ const QueuePanel = ({
                                     )}
                                 </div>
                                 <div className="mt-2 flex gap-1">
-                                    <Button
-                                        cta="Examine Transaction"
-                                        onClick_={() => {
-                                            // Use callback if provided
-                                            onExamineTransaction?.(tx);
-                                        }}
-                                    />
+                                    <div className="full-width">
+                                        <Button
+                                            cta="Examine Transaction"
+                                            onClick_={() => {
+                                                // Use callback if provided
+                                                onExamineTransaction?.(tx);
+                                            }}
+                                        />
+                                    </div>
                                     <button
                                         onClick={() => {
                                             // Use callback if provided
@@ -509,9 +511,9 @@ const QueuePanel = ({
                                         d="M6.5 4L6.303 4.5915C6.24777 4.75718 6.15472 4.90774 6.03123 5.03123C5.90774 5.15472 5.75718 5.24777 5.5915 5.303L5 5.5L5.5915 5.697C5.75718 5.75223 5.90774 5.84528 6.03123 5.96877C6.15472 6.09226 6.24777 6.24282 6.303 6.4085L6.5 7L6.697 6.4085C6.75223 6.24282 6.84528 6.09226 6.96877 5.96877C7.09226 5.84528 7.24282 5.75223 7.4085 5.697L8 5.5L7.4085 5.303C7.24282 5.24777 7.09226 5.15472 6.96877 5.03123C6.84528 4.90774 6.75223 4.75718 6.697 4.5915L6.5 4Z"
                                     ></path>
                                     </svg>
-                                        <span className="text_button font-bold">Ask AI</span>
+                                    <span className="text_button font-bold">Ask AI</span>
                                     </button>
-                                    {tx.confirmations.length <
+                                    {/*tx.confirmations.length <
                                     tx.confirmationsRequired ? (
                                         <Button
                                             cta="Confirm Transaction"
@@ -532,7 +534,7 @@ const QueuePanel = ({
                                                 )
                                             }
                                         />
-                                    )}
+                                    )*/}
                                 </div>
                             </div>
                         );
@@ -635,29 +637,37 @@ export default function Home() {
                             )}
 
                             {walletsReady &&
-                                wallets.map((wallet) => (
-                                    <div
-                                        key={wallet.address}
-                                        className="flex min-w-full flex-row items-center justify-between gap-2 bg-slate-50 p-4 full-width"
-                                    >
-                                        <div className="flex items-center gap-2">
-                                            <MonoLabel label={shorten(wallet.address)} />
-                                            <div style={{cursor: "pointer"}} onClick={() => {
-                                                    navigator.clipboard.writeText(wallet.address);
-                                            }}>
-                                                📋
+                                wallets.map((wallet) => {
+                                    // Assume activeWallet is available from your wallets hook (or state)
+                                    const isActive = wallet.address === address;
+                                    return (
+                                        <div
+                                            key={wallet.address}
+                                            className="flex min-w-full flex-row items-center justify-between gap-2 bg-slate-50 p-4 full-width"
+                                        >
+                                            <div className="flex items-center gap-2">
+                                                <MonoLabel label={shorten(wallet.address)} />
+                                                <div
+                                                    style={{ cursor: "pointer" }}
+                                                    onClick={() => navigator.clipboard.writeText(wallet.address)}
+                                                >
+                                                    📋
+                                                </div>
+                                            </div>
+                                            <div className="flex gap-2">
+                                                <Button
+                                                    cta={isActive ? "Active" : "Switch"}
+                                                    onClick_={() => {
+                                                        if (!isActive) {
+                                                            setActiveWallet(wallet);
+                                                        }
+                                                    }}
+                                                    disabled={isActive}
+                                                />
                                             </div>
                                         </div>
-                                        <div className="flex gap-2">
-                                            <Button
-                                                cta="Select"
-                                                onClick_={() => {
-                                                    setActiveWallet(wallet);
-                                                }}
-                                            />
-                                        </div>
-                                    </div>
-                                ))
+                                    );
+                                })
                             }
 
                             {ready && authenticated && (

@@ -131,7 +131,7 @@ const AIKeysPanel = ({ safeAddress }: { safeAddress: string }) => {
     return (
         <div className="bg-white rounded-lg p-4 border border-gray-200">
             <h2 className="text-xl font-bold mb-3">
-                AI Keys Permission for Safe
+                AI Keys Permission for Safe Wallet
             </h2>
             <div className="mb-4">
                 <MonoLabel label={shorten(safeAddress)} />

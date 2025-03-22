@@ -64,8 +64,8 @@ class CryptoTradingAssistant:
 
     async def process_question_safe(self, question, user_id, model):
         await self.collection.init()
-        # @TODO: pass session_id or user_address to get history based on user
         history = await self.collection.read_from_nodes()
+        # context = await self.get_pending_txs(safe_wallet)
         context = ""
         # send_into = await self.recognize_send_request_with_ai(question, model)
         prompt = (
@@ -82,7 +82,7 @@ class CryptoTradingAssistant:
             "- Use bullet points (or emojis as bullet point) to list key features or details.\n"
             "- Separate ideas into paragraphs for better readability!\n"
             "- Often include emojis to make the text more engaging.\n"
-            "ADD <EXECUTE_PENDING> at the end"
+            "If users prompt includes words execute,pending,transaction and he asks to proceed then ignore analysis and output <EXECUTE_PENDING> at the end ONLY if user asks to execute pending transactions, otherwise remove it completely!\n"
         )
 
         response = ""
@@ -230,7 +230,7 @@ class CryptoTradingAssistant:
             user_id = "endpoint: "+ str(datetime.now())
             response = ""
             if input_model == "ask_nilai":
-                response = await self.process_question_safe(question, user_id, default_nil_ai_model)
+                response = await self.process_question_safe(question, user_id, default_openrouter_ai_model)
             else:
                 response = await self.process_question_safe(question, user_id, default_openrouter_ai_model)
 

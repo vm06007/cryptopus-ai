@@ -54,7 +54,7 @@ const SendTransaction = ({ to, amount, warning }: { to: string; amount: string, 
     // Update resolved address when ENS resolution completes
     useEffect(() => {
         if (ensAddress) {
-            setResolvedAddress(ensAddress);
+            setResolvedAddress(ensAddress as any);
         } else if (isEnsError && currentEnsName && to && !to.includes('.eth')) {
             // If ENS resolution fails and we were trying to resolve a name with .eth added,
             // fall back to the default address
