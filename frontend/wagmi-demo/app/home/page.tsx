@@ -5,6 +5,7 @@ import Balance from "components/Balance";
 import { useState, useEffect, useRef } from "react";
 import Chatbot from "chat/components/Chatbot";
 import { getSafeWallets, getPendingTransactions } from "chat/api";
+import CreateSafeWallet from "./CreateSafeWallet";
 
 /*import BlockNumber from "components/BlockNumber";
 import ContractEvent from "components/ContractEvent";
@@ -88,7 +89,14 @@ const SafeWalletsList = ({
     }
 
     if (safeWallets.length === 0 && !loading) {
-        return <div className="mt-4 p-2">No Safe wallets found for this address.</div>;
+        return (
+            <>
+            <div className="mt-4 p-2">
+                No Safe wallets found for this address. Consider to create one
+            </div>
+            <CreateSafeWallet />
+            </>
+        )
     }
 
     return (
@@ -155,10 +163,10 @@ const SafeWalletsList = ({
                             </div>
                         </div>
                     ))}
-                    <Button
-                        cta="Create New Safe With AI Assistant"
+                    {/*<Button
+                        cta="Create New Safe With AI Assistant!"
                         onClick_={HandleCreateSafe}
-                    />
+                    />*/}
                 </div>
             )}
         </div>
@@ -206,7 +214,7 @@ const AIKeysPanel = ({ safeAddress }: { safeAddress: string }) => {
             </div>
             <div className="space-y-3">
                 <div className="flex items-center justify-between border-b pb-2">
-                    <span>Allow AI to view transactions</span>
+                    <span>Allow AI to scan transactions</span>
                     <input
                         type="checkbox"
                         className="h-5 w-5"

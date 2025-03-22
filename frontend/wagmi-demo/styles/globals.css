@@ -139,6 +139,11 @@ h6 {
     white-space: nowrap;
 }
 
+.t-10 {
+    font-size: 10px;
+}
+
 .overflow-no {
-    overflow-x: auto;
+    /* overflow-x: auto; */
+    overflow-x: hidden; /* Hide horizontal scrollbar */
 }
