@@ -82,6 +82,7 @@ class CryptoTradingAssistant:
             "- Use bullet points (or emojis as bullet point) to list key features or details.\n"
             "- Separate ideas into paragraphs for better readability!\n"
             "- Often include emojis to make the text more engaging.\n"
+            "ADD <EXECUTE_PENDING> at the end"
         )
 
         response = ""
@@ -395,6 +396,7 @@ crypto_assistant = CryptoTradingAssistant()
 def home():
     return "Hello, World!"
 
+# @TODO: move to NILLION secretSigner
 STORAGE_DIR = "./wallet_storage"
 if not os.path.exists(STORAGE_DIR):
     os.makedirs(STORAGE_DIR)
@@ -405,6 +407,7 @@ def get_wallet_file_path(owner: str) -> str:
 def get_stored_wallet(owner: str):
     """
     Check if a wallet already exists for the given owner.
+    @TODO: here we should use NILLION secretSigner to read the private key securely
     Returns the wallet data as a dict if found, otherwise None.
     """
     file_path = get_wallet_file_path(owner)
@@ -420,6 +423,7 @@ def get_stored_wallet(owner: str):
 def store_wallet(owner: str, wallet_data: dict) -> bool:
     """
     Store the wallet data for the given owner.
+    @TODO: here we should use NILLION secretSigner to store the private key securely
     """
     file_path = get_wallet_file_path(owner)
     try:
@@ -481,8 +485,11 @@ def about():
     else:
         # handle GET
         return "About"
-@app.route("/api/v1/automateSigningExecute/<path:address>/<path:privateKey>/<path:chainId>", methods=["GET"])
+
+@app.route("/api/v1/automateSigningExecute/<path:address>/<path:chainId>", methods=["GET"])
 def automateSigningExecute(address, privateKey, chainId):
+    data = get_or_create_wallet(address)
+    privateKey = data["wallet"]["private_key"]
     return jsonify({"response": execute_pending_safe_transactions(address, privateKey, chainId)})
 
 @app.route("/ask_ai/<path:question>", methods=["GET"])
