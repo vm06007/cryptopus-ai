@@ -80,6 +80,9 @@ h6 {
 
 .no-bg {
     background: none !important;
+    backdrop-filter: blur(2px);
+    padding: 10px;
+    border-radius: 50px;
 }
 
 .vh-100 {

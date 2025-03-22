@@ -102,7 +102,7 @@ const SafeWalletsList = ({
     return (
         <div className="mt-4">
             <div className="flex items-center justify-between mb-0">
-                <h2 className="text-xl font-bold mb-1">Your Safe Wallets</h2>
+                <h2 className="text-xl font-bold mb-1">Your Safe AI Wallets</h2>
             </div>
             {safeWallets.length === 0 && !loading ? (
                 <div className="mt-4 p-2">No Safe wallets found for this address.</div>
@@ -492,7 +492,7 @@ const QueuePanel = ({
                 Transaction Queue
             </h2>
             <div className="mb-4">
-                <MonoLabel label={shorten(safeAddress)} />
+                Safe Wallet: <MonoLabel label={shorten(safeAddress)} />
             </div>
             {pendingTransactions.length === 0 ? (
                 <div className="p-4 text-center">
@@ -818,6 +818,13 @@ export default function Home() {
                                         Safe Wallet
                                     </p>
                                 </div>
+                                <div
+                                    className={`flex align-middle items-center gap-2 justify-around px-3 py-1 border-[1px] border-gray-400 rounded-full cursor-default select-none transition-colors duration-200 ${currentMode === "more" ? "bg-bisque" : "bg-white"} hover:bg-primary`}
+                                >
+                                    <p className="text-lg align-baseline">
+                                        ...
+                                    </p>
+                                </div>
                             </div>
                         </header>
 
@@ -828,8 +835,8 @@ export default function Home() {
                     {/* RIGHT COLUMN */}
                     <div className="border-1 flex flex-col items-start gap-2 rounded border border-black bg-slate-100 p-3 vh-100">
                         <div className="sticky">
-                            <h1 className="text-2xl font-bold">
-                                Your Active Wallet
+                            <h1 className="text-2xl font-bold mb-2">
+                                Your Active Connected Wallet
                             </h1>
                             <p>Current Mode: {currentMode.toUpperCase()}</p>
                             <p>
@@ -849,14 +856,16 @@ export default function Home() {
                                     <div>
                                         <MonoLabel label={address} />
                                     </div>
-                                    <p>Wallet Balance:</p>
-                                    <div>
+                                    <p>Wallet Balance: 💵</p>
+                                    <div className="mb-2">
                                         <Balance />
                                     </div>
-                                    <Button
-                                        onClick_={disconnect}
-                                        cta="Disconnect from Octopus AI"
-                                    />
+                                    <div className="full-width">
+                                        <Button
+                                            onClick_={disconnect}
+                                            cta="Disconnect from Octopus AI"
+                                        />
+                                    </div>
 
                                     {/* Render the selected Safe info */}
                                     {selectedSafe && (
