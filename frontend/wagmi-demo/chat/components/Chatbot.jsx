@@ -111,7 +111,9 @@ function ChatbotInner({ chatMode }, ref) {
         <div className="relative grow flex flex-col gap-6 pt-6">
             {messages.length === 0 && (
                 <div className="mt-3 font-urbanist text-primary-blue text-xl font-light space-y-2">
-                    <p>👋 Welcome! This is ChatBot Box</p>
+                    <p>👋 Welcome!</p>
+                    <p>I'm a cryptopus - a cryptographic octopus AI bot, that can adapt to any environment while focusing on user security and funds safety.</p>
+                    <p>Ask me anything about DeFi or try my Safe Wallet AI integration as a bonus!</p>
                 </div>
             )}
             <ChatMessages

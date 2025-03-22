@@ -768,7 +768,7 @@ export default function Home() {
                                     onClick={() => {
                                         setCurrentMode("ask_ai");
                                     }}
-                                    className="flex align-middle items-center gap-2 justify-around px-2 py-1 border-[1px] border-gray-400 bg-white rounded-full hover:bg-primary cursor-default select-none"
+                                    className={`flex align-middle items-center gap-2 justify-around px-2 py-1 border-[1px] border-gray-400 rounded-full cursor-default select-none transition-colors duration-200 ${currentMode === "ask_ai" ? "bg-bisque" : "bg-white"} hover:bg-primary`}
                                 >
                                     <div className="min-w-5 max-w-7 h-8 aspect-square pointer-events-none">
                                         <Image
@@ -786,7 +786,7 @@ export default function Home() {
                                     onClick={() => {
                                         setCurrentMode("trade");
                                     }}
-                                    className="flex align-middle items-center gap-2 justify-around px-2 py-1 border-[1px] border-gray-400 bg-white rounded-full hover:bg-primary cursor-default select-none"
+                                    className={`flex align-middle items-center gap-2 justify-around px-2 py-1 border-[1px] border-gray-400 rounded-full cursor-default select-none transition-colors duration-200 ${currentMode === "trade" ? "bg-bisque" : "bg-white"} hover:bg-primary`}
                                 >
                                     <div className="min-w-5 max-w-5 h-5 aspect-square pointer-events-none">
                                         <Image
@@ -804,7 +804,7 @@ export default function Home() {
                                     onClick={() => {
                                         setCurrentMode("safe");
                                     }}
-                                    className="flex align-middle items-center gap-2 justify-around px-2 py-1 border-[1px] border-gray-400 bg-white rounded-full hover:bg-primary cursor-default select-none"
+                                    className={`flex align-middle items-center gap-2 justify-around px-2 py-1 border-[1px] border-gray-400 rounded-full cursor-default select-none transition-colors duration-200 ${currentMode === "safe" ? "bg-bisque" : "bg-white"} hover:bg-primary`}
                                 >
                                     <div className="min-w-5 max-w-7 h-6 aspect-square pointer-events-none">
                                         <Image
