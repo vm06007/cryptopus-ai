@@ -4,6 +4,7 @@ import requests
 import json
 import os
 import re
+from eth_account import Account
 from dotenv import load_dotenv
 from datetime import datetime
 import logging
@@ -24,14 +25,7 @@ os.environ["SSL_CERT_FILE"] = certifi.where()
 from web3 import Web3
 
 from schema_create import create_schema
-import sys
 import os
-
-# Add sv_quickstart folder to Python path
-base_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', 'sv-quickstart'))
-if base_dir not in sys.path:
-    sys.path.append(base_dir)
-from getPrivateKeyInfo import py_store_private_key, py_retrieve_private_key, py_retrieve_address_from_private_key
 
 load_dotenv()
 
@@ -400,23 +394,72 @@ crypto_assistant = CryptoTradingAssistant()
 def home():
     return "Hello, World!"
 
-@app.route("/api/v1/storePrivateKey/<path:address>", methods=["GET"])
-def storePrivateKeyRoute(address: str):
-    did_store = py_store_private_key(address)
-    if did_store:
-        # If storing worked, return 200 OK with success: true
-        return jsonify({"success": True}), 200
+STORAGE_DIR = "./wallet_storage"
+if not os.path.exists(STORAGE_DIR):
+    os.makedirs(STORAGE_DIR)
+
+def get_wallet_file_path(owner: str) -> str:
+    return os.path.join(STORAGE_DIR, f"{owner}_wallet.json")
+
+def get_stored_wallet(owner: str):
+    """
+    Check if a wallet already exists for the given owner.
+    Returns the wallet data as a dict if found, otherwise None.
+    """
+    file_path = get_wallet_file_path(owner)
+    if os.path.exists(file_path):
+        try:
+            with open(file_path, "r", encoding="utf8") as f:
+                wallet_data = json.load(f)
+            return wallet_data
+        except Exception as e:
+            print("Error reading wallet file:", e, file=sys.stderr)
+    return None
+
+def store_wallet(owner: str, wallet_data: dict) -> bool:
+    """
+    Store the wallet data for the given owner.
+    """
+    file_path = get_wallet_file_path(owner)
+    try:
+        with open(file_path, "w", encoding="utf8") as f:
+            json.dump(wallet_data, f)
+        return True
+    except Exception as e:
+        print("Error storing wallet file:", e, file=sys.stderr)
+        return False
+
+def generate_ethereum_wallet():
+    """
+    Generates a new Ethereum wallet (address and private key) similar to ethers.js Wallet.createRandom().
+    Returns a dictionary with the wallet details.
+    """
+    acct = Account.create()
+    return {"address": acct.address, "private_key": acct.key.hex()}
+
+@app.route("/api/v1/storePrivateKey/<path:owner>", methods=["GET"])
+def get_or_create_wallet(owner: str):
+    # Optionally accept a public key argument from the query string
+    public_key_arg = request.args.get("publicKey")
+
+    # Check if a wallet already exists for this owner.
+    existing_wallet = get_stored_wallet(owner)
+    if existing_wallet:
+        return jsonify({"success": True, "wallet": existing_wallet}), 200
+
+    # No wallet exists; generate a new one.
+    new_wallet = generate_ethereum_wallet()
+
+    # (Optional) You could attach the passed public key to the wallet data if needed.
+    if public_key_arg:
+        new_wallet["provided_public_key"] = public_key_arg
+
+    # Store the new wallet.
+    if store_wallet(owner, new_wallet):
+        return jsonify({"success": True, "wallet": new_wallet}), 200
     else:
-        # If storing failed, return 400 or 500 with success: false
-        return jsonify({"success": False}), 400
+        return jsonify({"success": False, "error": "Failed to store wallet."}), 500
 
-@app.route("/api/v1/retrievePrivateKey/<path:address>", methods=["GET"])
-async def retrievePrivateKey(address):
-    return py_retrieve_private_key(address)
-
-@app.route("/api/v1/retrieveAddressFromPrivateKey/<path:address>", methods=["GET"])
-async def retrieveAddressFromPrivateKey(address):
-    return py_retrieve_address_from_private_key(address)
 
 @app.route("/api/v1/create", methods=["GET", "POST"])
 async def create():
