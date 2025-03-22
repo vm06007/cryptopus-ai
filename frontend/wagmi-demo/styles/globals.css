@@ -151,6 +151,18 @@ h6 {
 }
 
 .overflow-no {
-    /* overflow-x: auto; */
-    overflow-x: hidden; /* Hide horizontal scrollbar */
+    overflow-x: auto;
+    /*overflow-x: hidden; Hide horizontal scrollbar */
+}
+
+.ai-button {
+    margin-left: 5px;
+    margin-top: -10px;
+    position: absolute;
+    transform: scale(0.5);
+    filter: invert(1);
+}
+
+.ai-button span {
+    visibility: hidden;
 }
