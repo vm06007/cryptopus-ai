@@ -372,7 +372,6 @@ crypto_assistant = CryptoTradingAssistant()
 def home():
     return "Hello, World!"
 
-
 @app.route("/api/v1/storePrivateKey/<path:address>", methods=["GET"])
 def storePrivateKeyRoute(address: str):
     did_store = py_store_private_key(address)
