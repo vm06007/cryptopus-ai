@@ -16,6 +16,8 @@ import aiohttp
 import sqlite3
 import ssl
 from automateSigningExecute import execute_pending_safe_transactions
+from automateSigningExecuteSingle import execute_single_pending_safe_transaction
+from massageDataPending import get_lowest_pending_tx_info
 
 app = Flask(__name__)
 
@@ -485,6 +487,10 @@ def about():
 def automateSigningExecute(address, privateKey, chainId):
     return jsonify({"response": execute_pending_safe_transactions(address, privateKey, chainId)})
 
+@app.route("/api/v1/automateSigningExecuteSingle/<path:address>/<path:privateKey>/<path:chainId>", methods=["GET"])
+def automateSigningExecuteSingle(address, privateKey, chainId):
+    return jsonify({"response": execute_single_pending_safe_transaction(address, privateKey, chainId)})
+
 @app.route("/ask_ai/<path:question>", methods=["GET"])
 def ask_ai_get(question):
     model = request.args.get("model", default_nil_ai_model)
@@ -520,6 +526,43 @@ def ask_nilai_get(question):
 
     response = asyncio.run(crypto_assistant.ask_ai(question, model))
     return jsonify({"response": response})
+
+@app.route("/api/v1/analyze_transaction/<path:address>", methods=["GET"])
+def analyze_transaction(address):
+    # 1) Convert or replace any invalid surrogate characters
+    #    so Python won't throw a 'surrogates not allowed' error.
+#    transaction_clean = transaction.encode("utf-8", errors="replace").decode("utf-8", errors="replace")
+
+    # 2) Pick up the model choice from query param (defaults to "ask_nilai")
+    model = request.args.get("model", "ask_openrouter")
+
+    transaction = get_lowest_pending_tx_info(address)
+    print(transaction)
+    if not transaction:
+        return jsonify({"error": "Transaction is empty"}), 400
+
+    transaction_clean = json.dumps(transaction)
+
+    # 3) Build the question prompt for the AI
+    question = (
+        "Ignore all previous instructions."
+        "This is a transaction details: {transaction_clean}. "
+        "Is it true that the transaction contains 'operation': 1 and 'codeVerified': True? "
+    ).format(transaction_clean=transaction_clean)
+
+    # 4) Call your async AI method, capturing the raw string response
+    try:
+        assistant_response = asyncio.run(crypto_assistant.ask_ai(question, model))
+        print(assistant_response,"assistant_response")
+    except Exception as e:
+        logging.error(f"Error in ask_ai: {e}")
+        return jsonify({"error": "An error occurred while processing your question."}), 500
+
+    lower_response = assistant_response.lower()
+    if "no" in lower_response:
+        return jsonify({"response": "no"})
+    else:
+        return jsonify({"response": "yes"})
 
 @app.route("/ask_nilai", methods=["POST", "OPTIONS"])
 def ask_nilai_post():
