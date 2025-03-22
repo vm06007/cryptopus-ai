@@ -105,13 +105,15 @@ const SendTransaction = ({ to, amount, warning }: { to: string; amount: string, 
             {to && to.startsWith('0x') && (
                 <div className="text-sm mb-2">Using address: {to}</div>
             )}
+            <div className="inliner">
             <Button
                 cta="Confirm Transaction"
                 onClick_={() => prepareTransaction()}
                 disabled={isPending || (isAttemptingEnsResolution && isEnsLoading)}
             />
-            {isPending && <div>Check wallet</div>}
-            {isSuccess && <div>Transaction: {JSON.stringify(data)}</div>}
+            </div>
+            {isPending && <div className="inliner-pad">Check wallet</div>}
+            {isSuccess && <div className="inliner-pad">Transaction: {JSON.stringify(data)}</div>}
         </Wrapper>
     );
 };
