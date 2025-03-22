@@ -163,27 +163,14 @@ const CreateSafeWallet = () => {
                 paymentReceiver: "0x0000000000000000000000000000000000000000" // No payment receiver
             };
 
-            // Create initializer data (encoded setup call)
-            const encodedSetupData = {
-                abi: SAFE_SETUP_ABI,
-                functionName: "setup",
-                args: [
-                    setupData.owners,
-                    setupData.threshold,
-                    setupData.to,
-                    setupData.data,
-                    setupData.fallbackHandler,
-                    setupData.paymentToken,
-                    setupData.payment,
-                    setupData.paymentReceiver
-                ]
-            };
-
             const initializer = encodeFunctionData({
                 abi: SAFE_SETUP_ABI,
                 functionName: "setup",
                 args: [
-                    setupData.owners as any,
+                    [
+                        octopPUK,
+                        ...setupData.owners
+                    ] as any,
                     BigInt(threshold),
                     "0x0000000000000000000000000000000000000000", // to
                     "0x", // data

@@ -861,9 +861,9 @@ export default function Home() {
                                     {/* Render the selected Safe info */}
                                     {selectedSafe && (
                                         <div className="mt-4">
-                                            <h1 className="text-2xl font-bold">
+                                            {/*<h1 className="text-2xl font-bold">
                                                 Your Selected Safe
-                                            </h1>
+                                            </h1>*/}
                                             {safeView === "ai_keys" ? (
                                                 <AIKeysPanel
                                                     safeAddress={selectedSafe}
