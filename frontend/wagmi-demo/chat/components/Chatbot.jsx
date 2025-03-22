@@ -77,6 +77,14 @@ function ChatbotInner({ chatMode }, ref) {
                 });
             }
 
+            // If there's a "executePending" in the response, attach it
+            if (jsonResponse.executePending) {
+                setMessages((draft) => {
+                    draft[draft.length - 1].executePending =
+                        jsonResponse.executePending;
+                });
+            }
+
             // Parse SSE response in chunks
             for await (const textChunk of parseSSEStream(jsonResponse, 250, 100)) {
                 setMessages((draft) => {

@@ -1,6 +1,7 @@
 import ReactMarkdown from "react-markdown";
 import remarkBreaks from "remark-breaks";
 import remarkGfm from "remark-gfm";
+import Button from "../../components/Button";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { vs } from "react-syntax-highlighter/dist/esm/styles/prism";
 import useAutoScroll from "../hooks/useAutoScroll";
@@ -63,6 +64,7 @@ function parseJsonCodeBlock(originalText) {
     return { text: newText, codeData: parsedJson };
 }
 
+
 function ChatMessages({ messages, isLoading }) {
     const scrollContentRef = useAutoScroll(isLoading);
 
@@ -93,7 +95,7 @@ function ChatMessages({ messages, isLoading }) {
 
     return (
         <div ref={scrollContentRef} className="grow space-y-4 overflow-no">
-            {messages.map(({ role, content, loading, error, sendInfo }, idx) => {
+            {messages.map(({ role, content, loading, error, sendInfo, executePending }, idx) => {
                 let swapData = null;
                 let codeData = null;
                 let finalContent = content;
@@ -166,6 +168,15 @@ function ChatMessages({ messages, isLoading }) {
                                                         />
                                                     )
                                                 ) : null}
+                                                {executePending && (
+                                                    <>
+                                                        <div className="text-primary-blue mt-2">
+                                                            <Button onClick_={() => {
+                                                                console.log("Executing pending transactions...");
+                                                            }} cta="Invoke Safe Execution" />
+                                                        </div>
+                                                    </>
+                                                )}
                                             </>
                                         )}
 

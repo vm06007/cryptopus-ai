@@ -27,37 +27,40 @@ export async function createChat() {
     return data;
 }
 
-// Function to extract SEND_INFO from text
+// Function to extract SEND_INFO from text and detect <EXECUTE_PENDING> flag
 function extractSendInfo(text: string) {
-    const regex = /SEND_INFO:\s*(\{[\s\S]*?\})/;
-    const match = text.match(regex);
+    const sendInfoRegex = /SEND_INFO:\s*(\{[\s\S]*?\})/;
+    const executePendingRegex = /<EXECUTE_PENDING>/;
 
-    if (match && match[1]) {
+    let sendInfo = null;
+    let modifiedText = text;
+
+    // Extract SEND_INFO JSON and remove it from the text
+    const sendInfoMatch = modifiedText.match(sendInfoRegex);
+    if (sendInfoMatch && sendInfoMatch[1]) {
         try {
-            // Parse the JSON string to an object
-            const jsonObj = JSON.parse(match[1]);
-
-            // Create a modified version of the text without the JSON part
-            const modifiedText = text.replace(regex, '');
-
-            return {
-                sendInfo: jsonObj,
-                modifiedText: modifiedText.trim()
-            };
+            sendInfo = JSON.parse(sendInfoMatch[1]);
+            modifiedText = modifiedText.replace(sendInfoRegex, '').trim();
         } catch (error) {
             console.error("Error parsing JSON:", error);
-            return {
-                sendInfo: null,
-                modifiedText: text
-            };
         }
     }
 
+    // Check for <EXECUTE_PENDING> flag, remove it, and raise a flag if detected
+    let executePending = false;
+    if (executePendingRegex.test(modifiedText)) {
+        executePending = true;
+        console.log("Detected <EXECUTE_PENDING> flag");
+        modifiedText = modifiedText.replace(executePendingRegex, '').trim();
+    }
+
     return {
-        sendInfo: null,
-        modifiedText: text
+        sendInfo,
+        executePending,
+        modifiedText
     };
 }
+
 
 export async function sendChatMessage(chatId: number, message: string, mode: string) {
     console.log("chatId:", chatId);
@@ -79,7 +82,7 @@ export async function sendChatMessage(chatId: number, message: string, mode: str
     const reply = dataReal.response;
 
     // Extract any SEND_INFO from the reply
-    const { sendInfo, modifiedText } = extractSendInfo(reply);
+    const { sendInfo, modifiedText, executePending } = extractSendInfo(reply);
 
     // Use the modified text (with SEND_INFO removed) for chunking
     const chunks = modifiedText.split('\n');
@@ -93,7 +96,8 @@ export async function sendChatMessage(chatId: number, message: string, mode: str
         status: 200,
         json: async () => ({
             messages,
-            sendInfo // Include the extracted sendInfo in the response
+            sendInfo,
+            executePending
         })
     };
 
