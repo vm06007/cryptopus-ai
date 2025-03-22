@@ -1,19 +1,21 @@
+#!/usr/bin/env node
+
 require('dotenv').config();
 const minimist = require('minimist');
 const { ethers } = require('ethers');
 const axios = require('axios');
 
 const rawArgs = minimist(process.argv.slice(2), {
-    string: [
-      'safeAddress',
-      'destination',
-      'data',
-      'nonce',
-      'value'
-    ]
-  });
+  string: [
+    'safeAddress',
+    'destination',
+    'data',
+    'nonce',
+    'value'
+  ]
+});
 
-const privateKey = process.env.PRIVATE_KEY;
+console.log('Initial CLI args:', rawArgs);
 
 const gasToken        = '0x0000000000000000000000000000000000000000';
 const gasPrice        = '0';
@@ -29,6 +31,8 @@ const {
   nonce
 } = rawArgs;
 
+const privateKey = process.env.PRIVATE_KEY;
+
 if (!safeAddress || !privateKey || !destination || value === undefined) {
   console.error(
     'Missing required arguments.\n\nUsage:\n' +
@@ -42,6 +46,7 @@ if (!safeAddress || !privateKey || !destination || value === undefined) {
   process.exit(1);
 }
 
+// Convert numeric fields to strings
 const valueStr    = value.toString();
 const gasPriceStr = gasPrice.toString();
 let txNonce       = nonce;
@@ -66,7 +71,6 @@ async function fetchNonce(safeAddr) {
   return res.data.nonce;
 }
 
-
 (async () => {
   // If nonce not supplied, fetch from Safe service
   if (txNonce === undefined) {
@@ -79,6 +83,11 @@ async function fetchNonce(safeAddr) {
     }
   }
 
+  // Create provider & wallet
+  const provider = new ethers.JsonRpcProvider('https://arbitrum.drpc.org');
+  const wallet   = new ethers.Wallet(privateKey, provider);
+
+  // Minimal ABI fragment for getTransactionHash
   const safeAbiFragment = [
     {
       inputs: [
@@ -100,6 +109,8 @@ async function fetchNonce(safeAddr) {
     }
   ];
 
+  const safeContract = new ethers.Contract(safeAddress, safeAbiFragment, provider);
+
   // Compute transaction hash
   let safeTxHash;
   try {
@@ -120,6 +131,8 @@ async function fetchNonce(safeAddr) {
     process.exit(1);
   }
 
+  console.log('Safe Transaction Hash:', safeTxHash);
+
   // Sign the transaction hash
   let signature;
   try {
@@ -129,7 +142,6 @@ async function fetchNonce(safeAddr) {
     console.error('Signing failed:', err.message);
     process.exit(1);
   }
-
 
   // Build the payload
   const payload = {
@@ -171,4 +183,4 @@ async function fetchNonce(safeAddr) {
     }
     process.exit(1);
   }
-})
+})();
