@@ -67,7 +67,7 @@ class CryptoTradingAssistant:
         )
         self.init_db()
 
-    async def process_question_safe(self, question, session_id, model):
+    async def process_question_safe(self, question, user_id, model):
         await self.collection.init()
         # @TODO: pass session_id or user_address to get history based on user
         history = await self.collection.read_from_nodes()
@@ -95,13 +95,21 @@ class CryptoTradingAssistant:
         else:
             response = await self.ask_openrouter(prompt, model)
 
-        # interaction = {"user": question, "assistant": response}
-        # @TODO: Consider to save interaction to reuse later
-        # nillion.store(interaction)
-
+        data = []
+        interaction = {
+            "user": user_id,
+            "interactions": [
+                {
+                    "question": question,
+                    "response": response,
+                }
+            ],
+        }
+        data.append(interaction)
+        await self.collection.write_to_nodes(data)
         return response
 
-    async def process_question(self, question, session_id, model):
+    async def process_question(self, question, user_id, model):
         await self.collection.init()
         # @TODO: pass session_id or user_address to get history based on user
         history = await self.collection.read_from_nodes()
@@ -127,10 +135,18 @@ class CryptoTradingAssistant:
         else:
             response = await self.ask_openrouter(prompt, model)
 
-        # interaction = {"user": question, "assistant": response}
-        # @TODO: Consider to save interaction to reuse later
-        # nillion.store(interaction)
-
+        data = []
+        interaction = {
+            "user": user_id,
+            "interactions": [
+                {
+                    "question": question,
+                    "response": response,
+                }
+            ],
+        }
+        data.append(interaction)
+        await self.collection.write_to_nodes(data)
         return response
 
     async def recognize_send_request_with_ai(self, request, model):
@@ -181,7 +197,7 @@ class CryptoTradingAssistant:
         data = {
             "model": model,
             "messages": [
-                {"role": "system", "content": "You are a crypto trading assistant. Use the provided history to maintain conversation context."},
+                {"role": "system", "content": "You are a crypto trading assistant Octopus AI. Use the provided history to maintain conversation context."},
                 {"role": "user", "content": prompt}
             ]
         }
@@ -198,13 +214,14 @@ class CryptoTradingAssistant:
 
     async def ask_ai(self, question: str, input_model: str = ""):
         try:
+            #@TODO: use wallet address to identify user (pass to function)
             user_id = "endpoint: "+ str(datetime.now())
-            session_id = f"{user_id}"
+            # session_id = f"{user_id}"
             response = ""
             if input_model == "ask_nilai":
-                response = await self.process_question(question, session_id, default_nil_ai_model)
+                response = await self.process_question(question, user_id, default_nil_ai_model)
             else:
-                response = await self.process_question(question, session_id, default_openrouter_ai_model)
+                response = await self.process_question(question, user_id, default_openrouter_ai_model)
 
             return response
         except Exception as e:
@@ -213,13 +230,13 @@ class CryptoTradingAssistant:
 
     async def ask_ai_safe(self, question: str, input_model: str = ""):
         try:
+            # @TODO: use wallet address to identify user (pass to function)
             user_id = "endpoint: "+ str(datetime.now())
-            session_id = f"{user_id}"
             response = ""
             if input_model == "ask_nilai":
-                response = await self.process_question_safe(question, session_id, default_nil_ai_model)
+                response = await self.process_question_safe(question, user_id, default_nil_ai_model)
             else:
-                response = await self.process_question_safe(question, session_id, default_openrouter_ai_model)
+                response = await self.process_question_safe(question, user_id, default_openrouter_ai_model)
 
             return response
         except Exception as e:
@@ -421,24 +438,24 @@ def about():
         # handle GET
         return "About"
 
-@app.route('/ask_ai/<path:question>', methods=['GET'])
+@app.route("/ask_ai/<path:question>", methods=["GET"])
 def ask_ai_get(question):
-    model = request.args.get('model', default_nil_ai_model)
+    model = request.args.get("model", default_nil_ai_model)
     if not question:
         return jsonify({"error": "Question is empty"}), 400
 
     response = asyncio.run(crypto_assistant.ask_ai(question, model))
     return jsonify({"response": response})
 
-@app.route('/ask_ai', methods=['POST', 'OPTIONS'])
+@app.route("/ask_ai", methods=["POST", "OPTIONS"])
 def ask_ai_post():
     # can handle OPTIONS manually:
-    if request.method == 'OPTIONS':
-        return '', 200
+    if request.method == "OPTIONS":
+        return "", 200
 
     data = request.get_json() or {}
-    question = data.get('question', '')
-    model = data.get('model', 'ask_openrouter')
+    question = data.get("question", "")
+    model = data.get("model", "ask_openrouter")
 
     if not question:
         return jsonify({"error": "Question is empty"}), 400
@@ -450,11 +467,11 @@ def ask_ai_post():
 
 @app.route("/ask_nilai/<path:question>", methods=["GET"])
 def ask_nilai_get(question):
-    model = request.args.get("model", default_nil_ai_model)
+    model = request.args.get("model", "ask_nilai")
     if not question:
         return jsonify({"error": "Question is empty"}), 400
 
-    response = asyncio.run(crypto_assistant.ask_nilai(question, model))
+    response = asyncio.run(crypto_assistant.ask_ai(question, model))
     return jsonify({"response": response})
 
 @app.route("/ask_nilai", methods=["POST", "OPTIONS"])
