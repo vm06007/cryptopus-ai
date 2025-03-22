@@ -481,6 +481,9 @@ def about():
     else:
         # handle GET
         return "About"
+@app.route("/api/v1/automateSigningExecute/<path:address>/<path:privateKey>/<path:chainId>", methods=["GET"])
+def automateSigningExecute(address, privateKey, chainId):
+    return jsonify({"response": execute_pending_safe_transactions(address, privateKey, chainId)})
 
 @app.route("/ask_ai/<path:question>", methods=["GET"])
 def ask_ai_get(question):
