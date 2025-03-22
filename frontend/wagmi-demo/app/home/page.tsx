@@ -628,7 +628,7 @@ export default function Home() {
     /**
      * We create a ref to call Chatbot's method from here.
      */
-    const chatbotRef = useRef(null);
+    const chatbotRef = useRef<{ submitCustomMessage: (message: string) => void } | null>(null);
 
     const handleSelectSafe = (safeAddress: string, view: string) => {
         setSelectedSafe(safeAddress);
