@@ -268,7 +268,7 @@ const CreateSafeWallet = ({wallets}: {wallets: any[]}) => {
                     className="w-full p-2 border rounded"
                 />
                 <p className="text-sm text-gray-500 mt-1">
-                    {threshold} out of {owners.length + 1} owner(s) will need to confirm transactions
+                    {threshold} out of {owners.length + 1} owner(s) will need to confirm
                 </p>
             </div>
 
