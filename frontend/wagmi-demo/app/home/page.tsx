@@ -203,9 +203,11 @@ const formatTimeAgo = (date: string) => {
  * Accepts onExamineTransaction to handle the "Examine Transaction" click.
  */
 const QueuePanel = ({
+    address,
     safeAddress,
     onExamineTransaction
 }: {
+    address: string;
     safeAddress: string;
     onExamineTransaction?: (tx: any) => void;
 }) => {
@@ -346,7 +348,7 @@ const QueuePanel = ({
         };
 
         fetchPendingTransactions();
-    }, [safeAddress]);
+    }, [safeAddress, address]);
 
     if (loading) {
         return (
@@ -572,6 +574,7 @@ export default function Home() {
     const [safeView, setSafeView] = useState("");
 
     useEffect(() => {
+
         const fetchAssistantAddress = async (address: any) => {
             try {
                 const data = await getAssistantAddress(address);
@@ -585,6 +588,11 @@ export default function Home() {
         if (address) {
             fetchAssistantAddress(address);
         }
+    }, [address]);
+
+    useEffect(() => {
+        setSelectedSafe("");
+        setSafeView("");
     }, [address]);
 
     /**
@@ -858,6 +866,7 @@ export default function Home() {
                                                 />
                                             ) : safeView === "queue" ? (
                                                 <QueuePanel
+                                                    address={address}
                                                     safeAddress={selectedSafe}
                                                     onExamineTransaction={(
                                                         tx
