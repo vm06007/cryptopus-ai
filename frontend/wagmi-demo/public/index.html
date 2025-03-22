@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Octopus AI</title>
+    <link rel="icon" type="image/x-icon" href="favicon.svg" />
+    <link rel="stylesheet" href="./files/octopus.css" />
+    <link rel="stylesheet" href="./files/nuxt-ui.css" />
+    <style>
+        /* Reset some basic elements */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f5f5f5;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px 0;
+        }
+
+        .header .logo img {
+            height: 60px;
+        }
+
+        .content {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-top: 50px;
+            flex-wrap: wrap;
+            background: #fff;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .content__left {
+            flex: 1 1 500px;
+            padding: 20px;
+        }
+
+        .content__left__title h1 {
+            font-size: 3em;
+            margin-bottom: 20px;
+            color: #007BFF;
+        }
+
+        .content__left__description p {
+            font-size: 1.2em;
+            margin-bottom: 30px;
+        }
+
+        .content__left__cta .btn {
+            display: inline-block;
+            background: #007BFF;
+            color: #fff;
+            padding: 12px 30px;
+            text-decoration: none;
+            border-radius: 5px;
+            transition: background 0.3s ease;
+        }
+
+        .content__left__cta .btn:hover {
+            background: #0056b3;
+        }
+
+        .content__right {
+            flex: 1 1 500px;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .content__right img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 10px;
+        }
+
+        @media (max-width: 768px) {
+            .content {
+                flex-direction: column;
+            }
+
+            .content__left,
+            .content__right {
+                padding: 10px;
+            }
+
+            .content__left__title h1 {
+                font-size: 2.5em;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <header class="header">
+            <div class="logo">
+                <img src="favicon.svg" alt="Octopus AI Logo" />
+            </div>
+        </header>
+        <section class="content">
+            <div class="content__left">
+                <div class="content__left__title">
+                    <h1>Octopus AI</h1>
+                </div>
+                <div class="content__left__description">
+                    <p>
+                        !Octopus AI is a platform that helps you manage your business and make better decisions.
+                        Leveraging the power of AI, we analyze your data to provide actionable insights and drive
+                        success.
+                    </p>
+                </div>
+                <div class="content__left__cta">
+                    <a href="/home" class="btn">Get Started</a>
+                </div>
+            </div>
+            <div class="content__right">
+                <img src="https://art.pixilart.com/e1224c0b2b3026f.gif" alt="Octopus AI Illustration" />
+                <div id="octowrap">
+                    <div class="bubble"></div>
+                    <div class="bubble"></div>
+                    <div class="bubble"></div>
+                    <div class="bubble"></div>
+                    <div class="bubble"></div>
+                    <div class="bubble"></div>
+                    <div class="bubble"></div>
+                    <div class="bubble"></div>
+                    <div class="bubble"></div>
+                    <div class="bubble"></div>
+                    <div class="bubble"></div>
+                    <div class="bubble"></div>
+                    <div class="bubble"></div>
+                    <div class="bubble"></div>
+                </div>
+            </div>
+        </section>
+    </div>
+</body>
+
+</html>

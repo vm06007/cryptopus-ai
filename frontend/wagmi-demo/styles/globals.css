@@ -150,13 +150,21 @@ h6 {
     font-size: 10px;
 }
 
+.whitespace-pre-line {
+    overflow: hidden;
+    max-width: 500px;
+    text-overflow: ellipsis;
+}
+
 .overflow-no {
-    overflow-x: auto;
-    /*overflow-x: hidden; Hide horizontal scrollbar */
+    max-width: 690px;
+    text-overflow: ellipsis;
+    /*overflow-x: auto;*/
+    overflow-x: hidden; /* Hide horizontal scrollbar */
 }
 
 .ai-button {
-    margin-left: 5px;
+    margin-left: 45px;
     margin-top: -10px;
     position: absolute;
     transform: scale(0.5);
@@ -165,4 +173,14 @@ h6 {
 
 .ai-button span {
     visibility: hidden;
+}
+
+.inliner {
+    display: inline;
+}
+
+.inliner-pad {
+    display: inline;
+    margin-left: 10px;
+    line-height: 40px;
 }

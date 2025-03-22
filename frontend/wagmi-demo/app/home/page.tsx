@@ -2,10 +2,12 @@
 
 import Button from "components/Button";
 import Balance from "components/Balance";
+import BalanceDynamic from "components/BalanceDynamic";
 import { useState, useEffect, useRef } from "react";
 import Chatbot from "chat/components/Chatbot";
-import { getSafeWallets, getPendingTransactions } from "chat/api";
+import { getSafeWallets, getPendingTransactions, getAssistantAddress } from "chat/api";
 import CreateSafeWallet from "./CreateSafeWallet";
+import AIKeysPanel from "./AIKeysPanel";
 
 /*import BlockNumber from "components/BlockNumber";
 import ContractEvent from "components/ContractEvent";
@@ -49,12 +51,14 @@ const HandleCreateSafe = () => {
  * Component: Lists Safe wallets for a given address
  */
 const SafeWalletsList = ({
-    address,
     wallets,
+    address,
+    assistantAddress,
     onSelectSafe
 }: {
-    address: string;
     wallets: any[];
+    address: string;
+    assistantAddress: string;
     onSelectSafe: (safeAddress: string, view: string) => void;
 }) => {
     const [safeWallets, setSafeWallets] = useState([]);
@@ -96,7 +100,7 @@ const SafeWalletsList = ({
             <div className="mt-4 p-2">
                 No Safe wallets found for this address. Create new wallet with AI integration.
             </div>
-            <CreateSafeWallet wallets={wallets} />
+            <CreateSafeWallet wallets={wallets} assistantAddress={assistantAddress} />
             </>
         )
     }
@@ -141,7 +145,7 @@ const SafeWalletsList = ({
                                 </button>
                             </div>
                             <div className="flex gap-2 items-center" />
-                            <div className="flex gap-2 items-center inline">
+                            <div className="flex full-width gap-2 items-center inline">
                                 <button
                                     title="Integrate Octopus AI"
                                     className="gap-2 flex hover:bg-gray-100 p-2 rounded-full"
@@ -176,116 +180,6 @@ const SafeWalletsList = ({
 };
 
 /**
- * Component: AIKeysPanel - a mock of permissions UI
- */
-const AIKeysPanel = ({ safeAddress }: { safeAddress: string }) => {
-    const [canExecute, setCanExecute] = useState(false);
-    const [autoReject, setAutoReject] = useState(false);
-    const [autoExecute, setAutoExecute] = useState(false);
-
-    const handleExecuteChange = (
-        e: React.ChangeEvent<HTMLInputElement>
-    ) => {
-        const isChecked = e.target.checked;
-        setCanExecute(isChecked);
-        if (!isChecked) {
-            setAutoReject(false);
-            setAutoExecute(false);
-        }
-    };
-
-    const handleAutoRejectChange = (
-        e: React.ChangeEvent<HTMLInputElement>
-    ) => {
-        setAutoReject(e.target.checked);
-    };
-
-    const handleAutoExecuteChange = (
-        e: React.ChangeEvent<HTMLInputElement>
-    ) => {
-        setAutoExecute(e.target.checked);
-    };
-
-    return (
-        <div className="bg-white rounded-lg p-4 border border-gray-200">
-            <h2 className="text-xl font-bold mb-3">
-                AI Keys Permission for Safe
-            </h2>
-            <div className="mb-4">
-                <MonoLabel label={shorten(safeAddress)} />
-            </div>
-            <div className="space-y-3">
-                <div className="flex items-center justify-between border-b pb-2">
-                    <span>Allow AI to scan transactions</span>
-                    <input
-                        type="checkbox"
-                        className="h-5 w-5"
-                        defaultChecked
-                    />
-                </div>
-                <div className="flex items-center justify-between border-b pb-2">
-                    <span>Allow AI to sign transactions</span>
-                    <input
-                        type="checkbox"
-                        className="h-5 w-5"
-                        defaultChecked
-                    />
-                </div>
-                <div className="flex items-center justify-between border-b pb-2">
-                    <span>Allow AI to execute transactions</span>
-                    <input
-                        type="checkbox"
-                        className="h-5 w-5"
-                        checked={canExecute}
-                        onChange={handleExecuteChange}
-                    />
-                </div>
-                <div className="flex items-center justify-between border-b pb-2">
-                    <span className={!canExecute ? "text-gray-400" : ""}>
-                        Auto-reject malicious transactions
-                    </span>
-                    <input
-                        type="checkbox"
-                        className="h-5 w-5"
-                        checked={autoReject}
-                        onChange={handleAutoRejectChange}
-                        disabled={!canExecute}
-                        style={{ opacity: !canExecute ? 0.5 : 1 }}
-                    />
-                </div>
-                <div className="flex items-center justify-between border-b pb-2">
-                    <span className={!canExecute ? "text-gray-400" : ""}>
-                        Auto-execute non-malicious transactions
-                    </span>
-                    <input
-                        type="checkbox"
-                        className="h-5 w-5"
-                        checked={autoExecute}
-                        onChange={handleAutoExecuteChange}
-                        disabled={!canExecute}
-                        style={{ opacity: !canExecute ? 0.5 : 1 }}
-                    />
-                </div>
-            </div>
-            <div className="flex mt-4 gap-1">
-                <Button
-                    cta="Add AI"
-                    onClick_={() =>
-                        console.log("Saving AI permissions for", safeAddress)
-                    }
-                />
-                <Button
-                    cta="Save Permissions"
-                    onClick_={() =>
-                        console.log("Saving AI permissions for", safeAddress)
-                    }
-                />
-            </div>
-        </div>
-    );
-};
-
-/**
  * Helper function to display "time ago"
  */
 const formatTimeAgo = (date: string) => {
@@ -311,9 +205,11 @@ const formatTimeAgo = (date: string) => {
  * Accepts onExamineTransaction to handle the "Examine Transaction" click.
  */
 const QueuePanel = ({
+    address,
     safeAddress,
     onExamineTransaction
 }: {
+    address: string;
     safeAddress: string;
     onExamineTransaction?: (tx: any) => void;
 }) => {
@@ -454,7 +350,7 @@ const QueuePanel = ({
         };
 
         fetchPendingTransactions();
-    }, [safeAddress]);
+    }, [safeAddress, address]);
 
     if (loading) {
         return (
@@ -571,13 +467,15 @@ const QueuePanel = ({
                                     )}
                                 </div>
                                 <div className="mt-2 flex gap-1">
-                                    <Button
-                                        cta="Examine Transaction"
-                                        onClick_={() => {
-                                            // Use callback if provided
-                                            onExamineTransaction?.(tx);
-                                        }}
-                                    />
+                                    <div className="full-width">
+                                        <Button
+                                            cta="Examine Transaction"
+                                            onClick_={() => {
+                                                // Use callback if provided
+                                                onExamineTransaction?.(tx);
+                                            }}
+                                        />
+                                    </div>
                                     <button
                                         onClick={() => {
                                             // Use callback if provided
@@ -617,9 +515,9 @@ const QueuePanel = ({
                                         d="M6.5 4L6.303 4.5915C6.24777 4.75718 6.15472 4.90774 6.03123 5.03123C5.90774 5.15472 5.75718 5.24777 5.5915 5.303L5 5.5L5.5915 5.697C5.75718 5.75223 5.90774 5.84528 6.03123 5.96877C6.15472 6.09226 6.24777 6.24282 6.303 6.4085L6.5 7L6.697 6.4085C6.75223 6.24282 6.84528 6.09226 6.96877 5.96877C7.09226 5.84528 7.24282 5.75223 7.4085 5.697L8 5.5L7.4085 5.303C7.24282 5.24777 7.09226 5.15472 6.96877 5.03123C6.84528 4.90774 6.75223 4.75718 6.697 4.5915L6.5 4Z"
                                     ></path>
                                     </svg>
-                                        <span className="text_button font-bold">Ask AI</span>
+                                    <span className="text_button font-bold">Ask AI</span>
                                     </button>
-                                    {tx.confirmations.length <
+                                    {/*tx.confirmations.length <
                                     tx.confirmationsRequired ? (
                                         <Button
                                             cta="Confirm Transaction"
@@ -640,7 +538,7 @@ const QueuePanel = ({
                                                 )
                                             }
                                         />
-                                    )}
+                                    )*/}
                                 </div>
                             </div>
                         );
@@ -669,12 +567,35 @@ export default function Home() {
 
     // WAGMI
     const { address, isConnected, isConnecting, isDisconnected } = useAccount();
+    const [assistantAddress, setAssistantAddress] = useState("");
     const { disconnect } = useDisconnect();
     const { setActiveWallet } = useSetActiveWallet();
 
     const [currentMode, setCurrentMode] = useState("ask_ai");
     const [selectedSafe, setSelectedSafe] = useState("");
     const [safeView, setSafeView] = useState("");
+
+    useEffect(() => {
+
+        const fetchAssistantAddress = async (address: any) => {
+            try {
+                const data = await getAssistantAddress(address);
+                setAssistantAddress(data.wallet.address || "");
+            } catch (err) {
+                console.error("Failed to fetch assistant address:", err);
+                setAssistantAddress("");
+            }
+        };
+
+        if (address) {
+            fetchAssistantAddress(address);
+        }
+    }, [address]);
+
+    useEffect(() => {
+        setSelectedSafe("");
+        setSafeView("");
+    }, [address]);
 
     /**
      * We create a ref to call Chatbot's method from here.
@@ -726,41 +647,57 @@ export default function Home() {
                             )}
 
                             {walletsReady &&
-                                wallets.map((wallet) => (
-                                    <div
-                                        key={wallet.address}
-                                        className="flex min-w-full flex-row flex-wrap items-center justify-between gap-2 bg-slate-50 p-4 full-width"
-                                    >
-                                        <div>
-                                            <MonoLabel
-                                                label={shorten(
-                                                    wallet.address
-                                                )}
-                                            />
+                                wallets.map((wallet) => {
+                                    // Assume activeWallet is available from your wallets hook (or state)
+                                    const isActive = wallet.address === address;
+                                    return (
+                                        <div
+                                            key={wallet.address}
+                                            className="flex min-w-full flex-row items-center justify-between gap-2 bg-slate-50 p-4 full-width"
+                                        >
+                                            <div className="flex items-center gap-2">
+                                                <MonoLabel label={shorten(wallet.address)} />
+                                                <div
+                                                    style={{ cursor: "pointer" }}
+                                                    onClick={() => navigator.clipboard.writeText(wallet.address)}
+                                                >
+                                                    📋
+                                                </div>
+                                            </div>
+                                            <div className="flex gap-2">
+                                                <Button
+                                                    cta={isActive ? "Active" : "Switch"}
+                                                    onClick_={() => {
+                                                        if (!isActive) {
+                                                            setActiveWallet(wallet);
+                                                        }
+                                                    }}
+                                                    disabled={isActive}
+                                                />
+                                            </div>
                                         </div>
-                                        <Button
-                                            cta="Make Active"
-                                            onClick_={() => {
-                                                setActiveWallet(wallet);
-                                            }}
-                                        />
-                                    </div>
-                                ))}
+                                    );
+                                })
+                            }
 
                             {ready && authenticated && (
                                 <>
-                                    <p className="mt-2">
+                                    {/*<p className="mt-2">
                                         You are logged in with privy.
-                                    </p>
+                                    </p>*/}
+                                    <div className="flex items-center gap-4 mt-2 full-width">
                                     <Button
                                         onClick_={connectWallet}
                                         cta="Connect another wallet"
                                     />
+                                    </div>
+                                    <div className="flex items-center gap-4 full-width">
                                     <Button
                                         onClick_={linkWallet}
                                         cta="Link another wallet"
                                     />
-                                    <textarea
+                                    </div>
+                                    {/*<textarea
                                         value={JSON.stringify(
                                             wallets,
                                             null,
@@ -773,9 +710,8 @@ export default function Home() {
                                             2
                                         ).split("\n").length}
                                         disabled
-                                    />
-                                    <br />
-                                    <textarea
+                                    />*/}
+                                    {/*<textarea
                                         value={JSON.stringify(user, null, 2)}
                                         className="mt-2 w-full rounded-md bg-slate-700 p-4 font-mono text-xs text-slate-50 sm:text-sm"
                                         rows={JSON.stringify(
@@ -784,12 +720,13 @@ export default function Home() {
                                             2
                                         ).split("\n").length}
                                         disabled
-                                    />
-                                    <br />
-                                    <Button
-                                        onClick_={logout}
-                                        cta="Logout from Privy"
-                                    />
+                                    />*/}
+                                    <div className="full-width">
+                                        <Button
+                                            onClick_={logout}
+                                            cta="Logout from Privy"
+                                        />
+                                    </div>
                                 </>
                             )}
 
@@ -798,6 +735,7 @@ export default function Home() {
                                 <SafeWalletsList
                                     wallets={wallets}
                                     address={address}
+                                    assistantAddress={assistantAddress}
                                     onSelectSafe={handleSelectSafe}
                                 />
                             )}
@@ -900,9 +838,17 @@ export default function Home() {
                                     <div>
                                         <MonoLabel label={address} />
                                     </div>
+                                    <p>Assistant Address: 🤖</p>
+                                    <div>
+                                        <MonoLabel label={assistantAddress} />
+                                    </div>
                                     <p>Wallet Balance: 💵</p>
-                                    <div className="mb-2">
+                                    <div className="">
                                         <Balance />
+                                    </div>
+                                    <p>Assistant Balance: 💵</p>
+                                    <div className="mb-2">
+                                        <BalanceDynamic address={assistantAddress} />
                                     </div>
                                     <div className="full-width">
                                         <Button
@@ -923,6 +869,7 @@ export default function Home() {
                                                 />
                                             ) : safeView === "queue" ? (
                                                 <QueuePanel
+                                                    address={address}
                                                     safeAddress={selectedSafe}
                                                     onExamineTransaction={(
                                                         tx

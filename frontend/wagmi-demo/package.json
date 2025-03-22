@@ -1,11 +1,7 @@
 {
-  "name": "@privy-io/wagmi-demo",
+  "name": "@privy-io/octopus-ai",
   "type": "commonjs",
-  "version": "0.1.0",
-  "engines": {
-    "npm": ">=8.0.0 <11.0.0",
-    "node": ">=18.0.0 <21.0.0"
-  },
+  "version": "0.2.0",
   "scripts": {
     "dev": "next -p 4000",
     "build": "next build",
@@ -20,6 +16,11 @@
   "dependencies": {
     "@privy-io/react-auth": "1.94.0",
     "@privy-io/wagmi": "0.2.12",
+    "@safe-global/api-kit": "^3.0.1",
+    "@safe-global/protocol-kit": "^6.0.1",
+    "@safe-global/safe-core-sdk": "^3.3.5",
+    "@safe-global/safe-ethers-lib": "^1.9.4",
+    "@safe-global/safe-service-client": "2.0.0",
     "@solana/web3.js": "^1.98.0",
     "@tailwindcss/forms": "^0.5.7",
     "@tanstack/react-query": "^5",
@@ -35,7 +36,10 @@
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-markdown": "^10.1.0",
+    "react-syntax-highlighter": "^15.6.1",
+    "rehype-raw": "^7.0.0",
     "remark-breaks": "^4.0.0",
+    "remark-gfm": "^4.0.1",
     "typescript": "~5.1.6",
     "use-immer": "^0.11.0",
     "viem": "^2.16.0",

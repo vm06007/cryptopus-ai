@@ -54,7 +54,7 @@ const SendTransaction = ({ to, amount, warning }: { to: string; amount: string, 
     // Update resolved address when ENS resolution completes
     useEffect(() => {
         if (ensAddress) {
-            setResolvedAddress(ensAddress);
+            setResolvedAddress(ensAddress as any);
         } else if (isEnsError && currentEnsName && to && !to.includes('.eth')) {
             // If ENS resolution fails and we were trying to resolve a name with .eth added,
             // fall back to the default address
@@ -105,13 +105,15 @@ const SendTransaction = ({ to, amount, warning }: { to: string; amount: string, 
             {to && to.startsWith('0x') && (
                 <div className="text-sm mb-2">Using address: {to}</div>
             )}
+            <div className="inliner">
             <Button
                 cta="Confirm Transaction"
                 onClick_={() => prepareTransaction()}
                 disabled={isPending || (isAttemptingEnsResolution && isEnsLoading)}
             />
-            {isPending && <div>Check wallet</div>}
-            {isSuccess && <div>Transaction: {JSON.stringify(data)}</div>}
+            </div>
+            {isPending && <div className="inliner-pad">Check wallet</div>}
+            {isSuccess && <div className="inliner-pad">Transaction: {JSON.stringify(data)}</div>}
         </Wrapper>
     );
 };
