@@ -46,7 +46,7 @@ default_nil_ai_model = "meta-llama/Llama-3.1-8B-Instruct"
 default_openrouter_ai_model = "anthropic/claude-3-haiku:beta"
 safe_api_url_v1 = "https://safe-transaction-mainnet.safe.global/api/v1"
 safe_api_url_v2 = "https://safe-transaction-mainnet.safe.global/api/v2"
-
+safe_api_url_v3 = "https://safe-transaction-arbitrum.safe.global/api/v2"
 class CryptoTradingAssistant:
     def __init__(self):
         self.NILAI_API_KEY = os.getenv("NILAI_API_KEY")
@@ -659,6 +659,29 @@ def get_safe_wallets(address):
     except Exception as e:
         logging.error(f"Error getting Safe wallets for {address}: {str(e)}")
         return jsonify({"error": "Failed to retrieve Safe wallets"}), 500
+
+@app.route("/api/v1/tx/<address>/pendingArbitrum", methods=["GET"])
+def get_pending_txs(address):
+    try:
+        # Validate the Ethereum address format
+        if not Web3.is_address(address):
+            return jsonify({"error": "Invalid Ethereum address format"}), 400
+
+        # Basic Safe API request to get pending transactions
+        response = requests.get(f"{safe_api_url_v3}/safes/{address}/multisig-transactions/?executed=false")
+
+        if response.status_code != 200:
+            return jsonify({"error": f"Safe API error: {response.status_code}"}), response.status_code
+
+        # Return the transaction wallets data
+        return jsonify(response.json())
+
+    # Error handling
+    except Exception as e:
+        logging.error(f"Error getting transactions for {address}: {str(e)}")
+        return jsonify({"error": "Failed to retrieve transactions"}), 500
+
+
 
 @app.route("/api/v1/tx/<address>/pending", methods=["GET"])
 def get_pending_txs(address):
