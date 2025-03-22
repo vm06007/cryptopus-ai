@@ -104,13 +104,13 @@ if __name__ == "__main__":
 
     # 2) Retrieve private key
     print("Retrieving private key for 0x1234... (replace with valid address).")
-  #  private_key = py_retrieve_private_key("0x0148f12dc8DF482F768444397e03ECf16BB3F195")
-  #  print("Python got private key:", private_key)
-  #  priva
+    #  private_key = py_retrieve_private_key("0x0148f12dc8DF482F768444397e03ECf16BB3F195")
+    #  print("Python got private key:", private_key)
+    #  priva
     # 3) Retrieve derived address from the private key in vault
     #    Actually your JS 'getAddressFromPrivateKey' expects an address, so if you want
     #    to retrieve the private key and then derive the address from it, you'd do:
-   # if private_key:
+    # if private_key:
         # We can call the method that takes private key
     #    derived_address = py_retrieve_address_from_private_key("0xaA4Aef3De98A0336928e949A8Be405C1175Ac1Be")
     #    print("Python got derived address:", derived_address)
