@@ -100,9 +100,11 @@ const SAFE_ADDRESSES = {
     FALLBACK_HANDLER: "0xf48f2B2d2a534e402487b3ee7C18c33Aec0Fe5e4", // Default Handler
 };
 
-const CreateSafeWallet = () => {
+const CreateSafeWallet = ({wallets}: {wallets: any[]}) => {
     const { address } = useAccount();
-    const [owners, setOwners] = useState<string[]>(address ? [address] : []);
+    // loop through wallets and extract wallets.addres into array
+    const walletsAddresses = wallets.map(wallet => wallet.address);
+    const [owners, setOwners] = useState<string[]>(walletsAddresses ? [...walletsAddresses] : []);
     const [newOwner, setNewOwner] = useState<string>("");
     const [threshold, setThreshold] = useState<number>(1);
     const [loading, setLoading] = useState<boolean>(false);
