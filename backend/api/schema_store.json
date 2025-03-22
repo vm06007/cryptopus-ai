@@ -11,8 +11,7 @@
                 "coerce": true
             },
             "user": {
-                "type": "string",
-                "format": "uuid"
+                "type": "string"
             },
             "interactions": {
                 "type": "array",

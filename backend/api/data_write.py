@@ -1,8 +1,8 @@
 """Data Create and Read example using the SecretVault wrapper"""
 
 import asyncio
-import json
-import random
+# import json
+# import random
 import sys
 import certifi
 import os
@@ -13,32 +13,11 @@ from secretvaults import SecretVaultWrapper, OperationType
 from org_config import org_config
 
 # Update schema ID with your own value
-SCHEMA_ID = "a7f63017-ba91-4579-a43a-f98e2b0ed8be"
-
-# %allot signals that the value will be encrypted to one %share per node before writing to the collection
-def generate_web3_experience_survey_data(num_entries=10):
-    data = []
-    for _ in range(num_entries):
-        entry = {
-            "responses": [
-                {
-                    "rating": random.randint(1, 5),
-                    "question_number": random.randint(1, 10),
-                }
-                for _ in range(random.randint(3, 10))
-            ],
-        }
-        data.append(entry)
-
-    return data
-
-
-# Generate some entries
-web3_experience_survey_data = generate_web3_experience_survey_data(10)
+SCHEMA_ID = "60f48495-8f4d-4d30-86de-b3ff792d6325"
 
 async def main():
     """
-    Main function to demonstrate writing to and reading from nodes using the SecretVaultWrapper.
+    Main function to demonstrate writing to nodes using the SecretVaultWrapper.
     """
     try:
         # Initialize the SecretVaultWrapper instance with the org configuration and schema ID
@@ -50,8 +29,20 @@ async def main():
         )
         await collection.init()
 
+        data = []
+        entry = {
+            "user": "0xaAE0dB14a36784682668241b6bF9C0B3b795EA97",
+            "interactions": [
+                {
+                    "question": "What is your name?",
+                    "response": "My name is Octopus AI.",
+                }
+            ],
+        }
+        data.append(entry)
+
         # Write data to nodes
-        data_written = await collection.write_to_nodes(web3_experience_survey_data)
+        data_written = await collection.write_to_nodes(data)
 
         # Extract unique created IDs from the results
         new_ids = list(
@@ -65,9 +56,8 @@ async def main():
         print("🔏 Created IDs:")
         print("\n".join(new_ids))
 
-        # Read data from nodes
-        data_read = await collection.read_from_nodes()
-        print("📚 Read new records:", (json.dumps(data_read[: len(web3_experience_survey_data)], indent=2)))
+        # 🔏 Created IDs:
+        # 582dd4b5-36eb-4ed8-b1de-ef5c43bbe846
 
     except RuntimeError as error:
         print(f"❌ Failed to use SecretVaultWrapper: {str(error)}")
