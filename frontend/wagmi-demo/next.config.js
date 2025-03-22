@@ -12,6 +12,12 @@ const nextConfig = {
         };
         return config;
     },
+    rewrites: async () => [
+        {
+            source: "/",
+            destination: "/index.html",
+        },
+    ],
     images: {
         remotePatterns: [
             {
