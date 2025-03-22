@@ -1,6 +1,7 @@
 import os
 import certifi
 import requests
+import json
 import os
 import re
 from dotenv import load_dotenv
@@ -16,6 +17,8 @@ import ssl
 
 app = Flask(__name__)
 
+from org_config import org_config
+from secretvaults import SecretVaultWrapper, OperationType
 os.environ["SSL_CERT_FILE"] = certifi.where()
 
 from web3 import Web3
@@ -29,8 +32,6 @@ base_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '
 if base_dir not in sys.path:
     sys.path.append(base_dir)
 from getPrivateKeyInfo import py_store_private_key, py_retrieve_private_key, py_retrieve_address_from_private_key
-
-
 
 load_dotenv()
 
@@ -53,15 +54,23 @@ class CryptoTradingAssistant:
     def __init__(self):
         self.NILAI_API_KEY = os.getenv("NILAI_API_KEY")
         self.NILAI_API_URL = os.getenv("NILAI_API_URL")
+        self.NIL_SV_SCHEMA_ID = os.getenv("NIL_SECRET_VAULT_SCHEMA_ID")
         self.OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY")
         self.OPENROUTER_API_URL = os.getenv("OPENROUTER_API_URL")
         self.BASE_DIR = os.path.dirname(os.path.abspath(__file__))
         self.DB_PATH = os.path.join(self.BASE_DIR, "tokens.db")
+        self.collection = SecretVaultWrapper(
+            org_config["nodes"],
+            org_config["org_credentials"],
+            self.NIL_SV_SCHEMA_ID,
+            operation=OperationType.STORE,
+        )
         self.init_db()
 
-    async def process_question_safe(self, question, session_id, model):
-        #@TODO: retrieve previous conversation
-        history = ""
+    async def process_question_safe(self, question, user_id, model):
+        await self.collection.init()
+        # @TODO: pass session_id or user_address to get history based on user
+        history = await self.collection.read_from_nodes()
         context = ""
         # send_into = await self.recognize_send_request_with_ai(question, model)
         prompt = (
@@ -86,15 +95,24 @@ class CryptoTradingAssistant:
         else:
             response = await self.ask_openrouter(prompt, model)
 
-        # interaction = {"user": question, "assistant": response}
-        # @TODO: Consider to save interaction to reuse later
-        # nillion.store(interaction)
-
+        data = []
+        interaction = {
+            "user": user_id,
+            "interactions": [
+                {
+                    "question": question,
+                    "response": response,
+                }
+            ],
+        }
+        data.append(interaction)
+        await self.collection.write_to_nodes(data)
         return response
 
-    async def process_question(self, question, session_id, model):
-        #@TODO: retrieve previous conversation
-        history = ""
+    async def process_question(self, question, user_id, model):
+        await self.collection.init()
+        # @TODO: pass session_id or user_address to get history based on user
+        history = await self.collection.read_from_nodes()
         context = ""
         send_into = await self.recognize_send_request_with_ai(question, model)
         prompt = (
@@ -117,10 +135,18 @@ class CryptoTradingAssistant:
         else:
             response = await self.ask_openrouter(prompt, model)
 
-        # interaction = {"user": question, "assistant": response}
-        # @TODO: Consider to save interaction to reuse later
-        # nillion.store(interaction)
-
+        data = []
+        interaction = {
+            "user": user_id,
+            "interactions": [
+                {
+                    "question": question,
+                    "response": response,
+                }
+            ],
+        }
+        data.append(interaction)
+        await self.collection.write_to_nodes(data)
         return response
 
     async def recognize_send_request_with_ai(self, request, model):
@@ -171,7 +197,7 @@ class CryptoTradingAssistant:
         data = {
             "model": model,
             "messages": [
-                {"role": "system", "content": "You are a crypto trading assistant. Use the provided history to maintain conversation context."},
+                {"role": "system", "content": "You are a crypto trading assistant Octopus AI. Use the provided history to maintain conversation context."},
                 {"role": "user", "content": prompt}
             ]
         }
@@ -188,13 +214,14 @@ class CryptoTradingAssistant:
 
     async def ask_ai(self, question: str, input_model: str = ""):
         try:
+            #@TODO: use wallet address to identify user (pass to function)
             user_id = "endpoint: "+ str(datetime.now())
-            session_id = f"{user_id}"
+            # session_id = f"{user_id}"
             response = ""
             if input_model == "ask_nilai":
-                response = await self.process_question(question, session_id, default_nil_ai_model)
+                response = await self.process_question(question, user_id, default_nil_ai_model)
             else:
-                response = await self.process_question(question, session_id, default_openrouter_ai_model)
+                response = await self.process_question(question, user_id, default_openrouter_ai_model)
 
             return response
         except Exception as e:
@@ -203,13 +230,13 @@ class CryptoTradingAssistant:
 
     async def ask_ai_safe(self, question: str, input_model: str = ""):
         try:
+            # @TODO: use wallet address to identify user (pass to function)
             user_id = "endpoint: "+ str(datetime.now())
-            session_id = f"{user_id}"
             response = ""
             if input_model == "ask_nilai":
-                response = await self.process_question_safe(question, session_id, default_nil_ai_model)
+                response = await self.process_question_safe(question, user_id, default_nil_ai_model)
             else:
-                response = await self.process_question_safe(question, session_id, default_openrouter_ai_model)
+                response = await self.process_question_safe(question, user_id, default_openrouter_ai_model)
 
             return response
         except Exception as e:
@@ -220,8 +247,9 @@ class CryptoTradingAssistant:
 
         # @TODO: use wallet address to identify user (pass to function)
         user_id = 'endpoint: '+ str(datetime.now())
-        # @TODO: add history concept
-        history = ""
+        await self.collection.init()
+        # @TODO: pass session_id or user_address to get history based on user
+        history = await self.collection.read_from_nodes()
 
         swap_info = await self.recognize_swap_request_with_ai(request, default_openrouter_ai_model)
         logging.info(f"Swap request: {swap_info}")
@@ -372,7 +400,6 @@ crypto_assistant = CryptoTradingAssistant()
 def home():
     return "Hello, World!"
 
-
 @app.route("/api/v1/storePrivateKey/<path:address>", methods=["GET"])
 def storePrivateKeyRoute(address: str):
     did_store = py_store_private_key(address)
@@ -411,24 +438,24 @@ def about():
         # handle GET
         return "About"
 
-@app.route('/ask_ai/<path:question>', methods=['GET'])
+@app.route("/ask_ai/<path:question>", methods=["GET"])
 def ask_ai_get(question):
-    model = request.args.get('model', default_nil_ai_model)
+    model = request.args.get("model", default_nil_ai_model)
     if not question:
         return jsonify({"error": "Question is empty"}), 400
 
     response = asyncio.run(crypto_assistant.ask_ai(question, model))
     return jsonify({"response": response})
 
-@app.route('/ask_ai', methods=['POST', 'OPTIONS'])
+@app.route("/ask_ai", methods=["POST", "OPTIONS"])
 def ask_ai_post():
     # can handle OPTIONS manually:
-    if request.method == 'OPTIONS':
-        return '', 200
+    if request.method == "OPTIONS":
+        return "", 200
 
     data = request.get_json() or {}
-    question = data.get('question', '')
-    model = data.get('model', 'ask_openrouter')
+    question = data.get("question", "")
+    model = data.get("model", "ask_openrouter")
 
     if not question:
         return jsonify({"error": "Question is empty"}), 400
@@ -440,11 +467,11 @@ def ask_ai_post():
 
 @app.route("/ask_nilai/<path:question>", methods=["GET"])
 def ask_nilai_get(question):
-    model = request.args.get("model", default_nil_ai_model)
+    model = request.args.get("model", "ask_nilai")
     if not question:
         return jsonify({"error": "Question is empty"}), 400
 
-    response = asyncio.run(crypto_assistant.ask_nilai(question, model))
+    response = asyncio.run(crypto_assistant.ask_ai(question, model))
     return jsonify({"response": response})
 
 @app.route("/ask_nilai", methods=["POST", "OPTIONS"])

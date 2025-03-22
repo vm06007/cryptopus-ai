@@ -80,6 +80,9 @@ h6 {
 
 .no-bg {
     background: none !important;
+    backdrop-filter: blur(2px);
+    padding: 10px;
+    border-radius: 50px;
 }
 
 .vh-100 {
@@ -139,6 +142,27 @@ h6 {
     white-space: nowrap;
 }
 
+.bg-bisque {
+    background-color: beige;
+}
+
+.t-10 {
+    font-size: 10px;
+}
+
 .overflow-no {
     overflow-x: auto;
+    /*overflow-x: hidden; Hide horizontal scrollbar */
+}
+
+.ai-button {
+    margin-left: 5px;
+    margin-top: -10px;
+    position: absolute;
+    transform: scale(0.5);
+    filter: invert(1);
+}
+
+.ai-button span {
+    visibility: hidden;
 }

@@ -5,7 +5,7 @@ import { shorten, type AddressString } from "lib/utils";
 import { useEffect, useState } from "react";
 import { parseUnits } from "viem";
 // import { sepolia } from "viem/chains";
-import { useAccount, useWriteContract, useEnsAddress } from "wagmi";
+import { useWriteContract, useEnsAddress } from "wagmi";
 
 import Button from "./Button";
 import MonoLabel from "./MonoLabel";
