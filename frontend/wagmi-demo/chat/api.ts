@@ -104,6 +104,25 @@ export async function sendChatMessage(chatId: number, message: string, mode: str
     return res.json();
 }
 
+export async function getAssistantAddress(address: string) {
+    try {
+        const response = await fetch(`${BASE_URL}/api/${VERSION}/storePrivateKey/${address}`, {
+            method: "GET",
+            headers: { "Content-Type": "application/json" }
+        });
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        return data;
+    } catch (error) {
+        console.error("Error fetching safe wallets:", error);
+        return Promise.reject(error);
+    }
+}
+
 export async function getSafeWallets(address: string) {
     try {
         const response = await fetch(`${BASE_URL}/api/${VERSION}/owners/${address}/safes`, {
