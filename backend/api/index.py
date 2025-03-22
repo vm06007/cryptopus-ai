@@ -500,6 +500,25 @@ def automateSigningExecuteSingle(address, chainId):
     privateKey = data["wallet"]["private_key"]
     return jsonify({"response": execute_single_pending_safe_transaction(address, privateKey, chainId)})
 
+@app.route("/api/v1/clearQueueWithAnalyzeAndSignAndExecute/<path:address>/<path:chainId>", methods=["GET"])
+def clearQueueWithAnalyzeAndSignAndExecute(address, chainId):
+    data = get_or_create_wallet(address)
+    privateKey = data["wallet"]["private_key"]
+    reasonString = ""
+    while True:
+        response = analyze_transaction(address)
+        if (response == jsonify({"error": "Transaction is empty"}), 400):
+            reasonString = "No pending transactions found"
+            break
+        if response.json()["response"] == "yes":
+            execute_single_pending_safe_transaction(address, privateKey, chainId)
+            reasonString += "Transaction(s) executed"
+        else:
+            reasonString += "Transaction is not safe to execute"
+            break
+
+    return jsonify({"response": reasonString})
+
 @app.route("/ask_ai/<path:question>", methods=["GET"])
 def ask_ai_get(question):
     model = request.args.get("model", default_nil_ai_model)
