@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useAccount, useWriteContract } from "wagmi";
 import { encodeFunctionData } from "viem";
 // import { parseEther } from "viem";
@@ -103,8 +103,14 @@ const SAFE_ADDRESSES = {
 const CreateSafeWallet = ({wallets}: {wallets: any[]}) => {
     const { address } = useAccount();
     // loop through wallets and extract wallets.addres into array
-    const walletsAddresses = wallets.map(wallet => wallet.address);
-    const [owners, setOwners] = useState<string[]>(walletsAddresses ? [...walletsAddresses] : []);
+    const extractedWallets = wallets.map(wallet => wallet.address);
+
+    useEffect(() => {
+        const extractedWallets = wallets.map(wallet => wallet.address);
+        setOwners(extractedWallets);
+    }, [wallets]);
+
+    const [owners, setOwners] = useState<string[]>(extractedWallets ? [...extractedWallets] : []);
     const [newOwner, setNewOwner] = useState<string>("");
     const [threshold, setThreshold] = useState<number>(1);
     const [loading, setLoading] = useState<boolean>(false);
