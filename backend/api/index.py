@@ -34,6 +34,8 @@ load_dotenv()
 
 app = Flask(__name__)
 
+botRunning = False
+
 CORS(app, resources={r"/*/*": {
     "origins": [
         "http://localhost:3000",
@@ -518,6 +520,24 @@ def clearQueueWithAnalyzeAndSignAndExecute(address, chainId):
             break
 
     return jsonify({"response": reasonString})
+
+@app.route("/api/v1/fullyAutomateClearingQueueAndAnalyzeLoop/<path:address>/<path:chainId>", methods=["GET"])
+def fullyAutomateClearingQueueAndAnalyzeLoop(address, chainId):
+    if botRunning:
+        return jsonify({"response": "Bot is already running"}), 400
+    botRunning = True
+    while True:
+        response = clearQueueWithAnalyzeAndSignAndExecute(address, chainId)
+        time.sleep(10)
+        if (botRunning == False):
+            break
+    return jsonify({"response": "Bot stopped"})
+
+@app.route("/api/v1/stopBot", methods=["GET"])
+def stopBot():
+    global botRunning
+    botRunning = False
+    return jsonify({"response": "Bot stopped"})
 
 @app.route("/ask_ai/<path:question>", methods=["GET"])
 def ask_ai_get(question):
