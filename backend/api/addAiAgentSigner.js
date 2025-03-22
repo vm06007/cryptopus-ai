@@ -1,8 +1,10 @@
-// const { ethers } = require("ethers")
-// const SafeApiKit = require("@safe-global/api-kit")
-// const Safe = require("@safe-global/protocol-kit")
-// const { OperationType } = require("@safe-global/types-kit")
-const dotenv = require("dotenv")
+#!/usr/bin/env node
+
+import { ethers } from 'ethers'
+import SafeApiKit from '@safe-global/api-kit'
+import Safe from '@safe-global/protocol-kit'
+import { OperationType } from '@safe-global/types-kit'
+import * as dotenv from 'dotenv'
 
 dotenv.config()
 
