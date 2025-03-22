@@ -489,13 +489,15 @@ def about():
         return "About"
 
 @app.route("/api/v1/automateSigningExecute/<path:address>/<path:chainId>", methods=["GET"])
-def automateSigningExecute(address, privateKey, chainId):
+def automateSigningExecute(address, chainId):
     data = get_or_create_wallet(address)
     privateKey = data["wallet"]["private_key"]
     return jsonify({"response": execute_pending_safe_transactions(address, privateKey, chainId)})
 
-@app.route("/api/v1/automateSigningExecuteSingle/<path:address>/<path:privateKey>/<path:chainId>", methods=["GET"])
-def automateSigningExecuteSingle(address, privateKey, chainId):
+@app.route("/api/v1/automateSigningExecuteSingle/<path:address>/<path:chainId>", methods=["GET"])
+def automateSigningExecuteSingle(address, chainId):
+    data = get_or_create_wallet(address)
+    privateKey = data["wallet"]["private_key"]
     return jsonify({"response": execute_single_pending_safe_transaction(address, privateKey, chainId)})
 
 @app.route("/ask_ai/<path:question>", methods=["GET"])
@@ -668,7 +670,7 @@ def get_safe_wallets(address):
         return jsonify({"error": "Failed to retrieve Safe wallets"}), 500
 
 @app.route("/api/v1/tx/<address>/pendingArbitrum", methods=["GET"])
-def get_pending_txs(address):
+def get_pending_txs_arbitrum(address):
     try:
         # Validate the Ethereum address format
         if not Web3.is_address(address):
@@ -687,7 +689,6 @@ def get_pending_txs(address):
     except Exception as e:
         logging.error(f"Error getting transactions for {address}: {str(e)}")
         return jsonify({"error": "Failed to retrieve transactions"}), 500
-
 
 
 @app.route("/api/v1/tx/<address>/pending", methods=["GET"])
