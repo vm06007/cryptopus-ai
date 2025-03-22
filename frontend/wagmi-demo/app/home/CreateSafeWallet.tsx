@@ -3,12 +3,8 @@
 import { useEffect, useState } from "react";
 import { useAccount, useWriteContract } from "wagmi";
 import { encodeFunctionData } from "viem";
-// import { parseEther } from "viem";
 import Button from "components/Button";
 import MonoLabel from "components/MonoLabel";
-
-// @TODO: load dynamically based on connected wallet
-const octopPUK = "0xaAE0dB14a36784682668241b6bF9C0B3b795EA97";
 
 const SAFE_PROXY_FACTORY_ABI = [
     {
@@ -100,7 +96,7 @@ const SAFE_ADDRESSES = {
     FALLBACK_HANDLER: "0xf48f2B2d2a534e402487b3ee7C18c33Aec0Fe5e4", // Default Handler
 };
 
-const CreateSafeWallet = ({wallets}: {wallets: any[]}) => {
+const CreateSafeWallet = ({wallets, assistantAddress}: {wallets: any[], assistantAddress: string}) => {
     const { address } = useAccount();
     // loop through wallets and extract wallets.addres into array
     const extractedWallets = wallets.map(wallet => wallet.address);
@@ -176,7 +172,7 @@ const CreateSafeWallet = ({wallets}: {wallets: any[]}) => {
                 functionName: "setup",
                 args: [
                     [
-                        octopPUK,
+                        assistantAddress,
                         ...setupData.owners
                     ] as any,
                     BigInt(threshold),
@@ -220,7 +216,7 @@ const CreateSafeWallet = ({wallets}: {wallets: any[]}) => {
             <div className="mb-4">
                 <label className="block text-sm font-medium mb-1 text-gray-700">AI Assistant</label>
                     <div className="space-y-2 t-10 mb-3">
-                        <MonoLabel label={octopPUK} />
+                        <MonoLabel label={assistantAddress} />
                     </div>
                 <label className="block text-sm font-medium text-gray-700 mb-0">Owners</label>
                 <div className="space-y-2 t-10">

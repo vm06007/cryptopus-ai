@@ -51,12 +51,14 @@ const HandleCreateSafe = () => {
  * Component: Lists Safe wallets for a given address
  */
 const SafeWalletsList = ({
-    address,
     wallets,
+    address,
+    assistantAddress,
     onSelectSafe
 }: {
-    address: string;
     wallets: any[];
+    address: string;
+    assistantAddress: string;
     onSelectSafe: (safeAddress: string, view: string) => void;
 }) => {
     const [safeWallets, setSafeWallets] = useState([]);
@@ -98,7 +100,7 @@ const SafeWalletsList = ({
             <div className="mt-4 p-2">
                 No Safe wallets found for this address. Create new wallet with AI integration.
             </div>
-            <CreateSafeWallet wallets={wallets} />
+            <CreateSafeWallet wallets={wallets} assistantAddress={assistantAddress} />
             </>
         )
     }
@@ -733,6 +735,7 @@ export default function Home() {
                                 <SafeWalletsList
                                     wallets={wallets}
                                     address={address}
+                                    assistantAddress={assistantAddress}
                                     onSelectSafe={handleSelectSafe}
                                 />
                             )}
