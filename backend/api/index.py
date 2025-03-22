@@ -1,6 +1,7 @@
 import os
 import certifi
 import requests
+import json
 import os
 import re
 from dotenv import load_dotenv
@@ -16,6 +17,8 @@ import ssl
 
 app = Flask(__name__)
 
+from org_config import org_config
+from secretvaults import SecretVaultWrapper, OperationType
 os.environ["SSL_CERT_FILE"] = certifi.where()
 
 from web3 import Web3
@@ -29,8 +32,6 @@ base_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '
 if base_dir not in sys.path:
     sys.path.append(base_dir)
 from getPrivateKeyInfo import py_store_private_key, py_retrieve_private_key, py_retrieve_address_from_private_key
-
-
 
 load_dotenv()
 
@@ -53,15 +54,23 @@ class CryptoTradingAssistant:
     def __init__(self):
         self.NILAI_API_KEY = os.getenv("NILAI_API_KEY")
         self.NILAI_API_URL = os.getenv("NILAI_API_URL")
+        self.NIL_SV_SCHEMA_ID = os.getenv("NIL_SECRET_VAULT_SCHEMA_ID")
         self.OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY")
         self.OPENROUTER_API_URL = os.getenv("OPENROUTER_API_URL")
         self.BASE_DIR = os.path.dirname(os.path.abspath(__file__))
         self.DB_PATH = os.path.join(self.BASE_DIR, "tokens.db")
+        self.collection = SecretVaultWrapper(
+            org_config["nodes"],
+            org_config["org_credentials"],
+            self.NIL_SV_SCHEMA_ID,
+            operation=OperationType.STORE,
+        )
         self.init_db()
 
     async def process_question_safe(self, question, session_id, model):
-        #@TODO: retrieve previous conversation
-        history = ""
+        await self.collection.init()
+        # @TODO: pass session_id or user_address to get history based on user
+        history = await self.collection.read_from_nodes()
         context = ""
         # send_into = await self.recognize_send_request_with_ai(question, model)
         prompt = (
@@ -93,8 +102,9 @@ class CryptoTradingAssistant:
         return response
 
     async def process_question(self, question, session_id, model):
-        #@TODO: retrieve previous conversation
-        history = ""
+        await self.collection.init()
+        # @TODO: pass session_id or user_address to get history based on user
+        history = await self.collection.read_from_nodes()
         context = ""
         send_into = await self.recognize_send_request_with_ai(question, model)
         prompt = (
@@ -220,8 +230,9 @@ class CryptoTradingAssistant:
 
         # @TODO: use wallet address to identify user (pass to function)
         user_id = 'endpoint: '+ str(datetime.now())
-        # @TODO: add history concept
-        history = ""
+        await self.collection.init()
+        # @TODO: pass session_id or user_address to get history based on user
+        history = await self.collection.read_from_nodes()
 
         swap_info = await self.recognize_swap_request_with_ai(request, default_openrouter_ai_model)
         logging.info(f"Swap request: {swap_info}")
