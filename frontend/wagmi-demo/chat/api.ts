@@ -58,7 +58,6 @@ function extractSendInfo(text: string) {
     };
 }
 
-
 export async function sendChatMessage(chatId: number, message: string, mode: string) {
     console.log("chatId:", chatId);
     console.log("Sending message:", message);
