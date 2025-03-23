@@ -811,7 +811,12 @@ export default function Home() {
                         </header>
 
                         {/* Pass the ref to Chatbot */}
-                        <Chatbot chatMode={currentMode} ref={chatbotRef} />
+                        <Chatbot
+                            currentSafe={selectedSafe}
+                            currentUser={address}
+                            chatMode={currentMode}
+                            ref={chatbotRef}
+                        />
                     </div>
 
                     {/* RIGHT COLUMN */}
@@ -875,7 +880,7 @@ export default function Home() {
                                                         tx
                                                     ) => {
                                                         // Format a message to examine/parse the transaction
-                                                        const message = `Explain and analyze this transaction including function selector be aware that USDC token has 6 decimals and values are shown in wei means 1,000,000  is 1 USDC:\n\`\`\`json\n${JSON.stringify(
+                                                        const message = `Explain and analyze this transaction including function selector be aware of different token decimals, normally its 18 decimal precision values:\n\`\`\`json\n${JSON.stringify(
                                                             tx,
                                                             null,
                                                             2
