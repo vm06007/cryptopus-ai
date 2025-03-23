@@ -168,9 +168,8 @@ export async function sendPendingTransactionsToOctopusAI(
 ) {
     console.log("Sending pending transactions to Octopus AI for analysis and signing");
     // put artificial timeout for testing
-    await new Promise(resolve => setTimeout(resolve, 2000));
-
-    return { status: 200, data: { message: "Success" } };
+    // await new Promise(resolve => setTimeout(resolve, 2000));
+    // return { status: 200, data: { message: "Success" } };
     try {
         const f = "clearQueueWithAnalyzeAndSignAndExecute";
         const response = await fetch(`${BASE_URL}/api/${VERSION}/${f}/${safeAddress}/${userAddress}/${chainId}`, {
