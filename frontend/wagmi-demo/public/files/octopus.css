@@ -882,3 +882,25 @@ section {
   cursor: pointer;
   transform: scale(1.1);
 }
+
+.text-3xl {
+  font-size: 48px !important;
+  line-height: 60px !important;
+}
+
+#videoModal {
+  display: none !important;
+}
+
+.text-lg {
+  white-space: nowrap !important;
+}
+
+div.w-28.items-center {
+  width: 10rem !important;
+  height: 40px !important;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 7px;
+}

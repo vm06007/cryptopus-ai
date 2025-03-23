@@ -376,7 +376,7 @@
                                             <div><img src="https://cryptologos.cc/logos/pendle-pendle-logo.png"
                                                     class="w-5 h-5 md:w-9 md:h-9"></div>
                                             <div class="h-full flex flex-col justify-between">
-                                                <div class="text-lg">Pendle Finance</div>
+                                                <div class="text-lg">Pendle</div>
                                             </div>
                                         </div>
                                         <div
@@ -384,7 +384,7 @@
                                             <div><img src="https://wiselending.com/fb-og-image.png" width="20"
                                                     height="20" class="w-4 h-4 md:w-9 md:h-9"></div>
                                             <div class="h-full flex flex-col justify-between">
-                                                <div class="text-lg">WISE Lending</div>
+                                                <div class="text-lg">WISE Token</div>
                                             </div>
                                         </div>
                                         <div
@@ -608,5 +608,45 @@
         </div>
     </div>
     <div class="bg-trifecta revert-bg"></div>
+    <!-- Video Modal -->
+    <div id="videoModal" class="hidden fixed inset-0 bg-tr bg-opacity-75 flex justify-center items-center z-50">
+        <!-- Close Button -->
+        <button id="closeModal" class="absolute top-3 right-3 text-black text-xl font-bold">×</button>
+        <div class="relative bg-white rounded-lg shadow-lg w-[80%] md:w-[60%] lg:w-[40%]">
+            <!-- Video Player -->
+            <video id="demoVideo" controls class="w-full rounded-lg">
+                <source src="./files/demo.mp4" type="video/mp4">
+                Your browser does not support the video tag.
+            </video>
+        </div>
+    </div>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const modal = document.getElementById("videoModal");
+            const playButton = document.querySelector(".button");
+            const closeButton = document.getElementById("closeModal");
+            const video = document.getElementById("demoVideo");
+
+            // Open Modal & Play Video
+            playButton.addEventListener("click", function () {
+                modal.classList.remove("hidden");
+                video.play();
+            });
+
+            // Close Modal & Pause Video
+            closeButton.addEventListener("click", function () {
+                modal.classList.add("hidden");
+                video.pause();
+            });
+
+            // Close modal when clicking outside the video
+            modal.addEventListener("click", function (event) {
+                if (event.target === modal) {
+                    modal.classList.add("hidden");
+                    video.pause();
+                }
+            });
+        });
+    </script>
 </body>
 </html>
