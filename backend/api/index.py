@@ -586,9 +586,9 @@ async def fullyAutomateClearingQueueAndAnalyzeLoop(safeaddress,address, chainId)
     chain_id_int = int(chainId)
     botRunning = True
     while True:
-        print("clearing queue")
+
         await clearQueueWithAnalyzeAndSignAndExecute(safeaddress,address, chainId)
-        print("queue cleared2")
+
         time.sleep(10)
         if (botRunning == False):
             break
