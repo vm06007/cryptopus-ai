@@ -1,4 +1,3 @@
-
 import certifi
 import requests
 import json
@@ -21,6 +20,7 @@ nest_asyncio.apply()
 from automateSigningExecute import execute_pending_safe_transactions
 from automateSigningExecuteSingle import execute_single_pending_safe_transaction
 from massageDataPending import get_lowest_pending_tx_info
+from proposeMaliciousTransaction import propose_delegatecall_tx
 
 app = Flask(__name__)
 
@@ -553,27 +553,28 @@ async def clearQueueWithAnalyzeAndSignAndExecute(safeaddress, address, chainId):
     reasonString = ""
 
     while True:
-        # 3) Call analyze_transaction(safeaddress) => a Flask response
-        response = analyze_transaction(safeaddress)
+        try:
+            # 3) Call analyze_transaction(safeaddress) and get its response directly
+            analysis_result = analyze_transaction(safeaddress, chainId)
 
-        # If analyze_transaction returned a non-200 status, stop
-        if response.status_code != 200:
-            reasonString = f"Error analyzing transaction: {response.status_code}"
-            break
+            # 4) Parse the JSON content from the response
+            resp_json = analysis_result.get_json()
+            print(resp_json, "resp_json")
 
-        # 4) Parse the JSON content from the response
-        resp_json = response.get_json()
-        print(resp_json,"resp_json")
-        # 5) Check for "error" or "response" fields in resp_json
-        if resp_json.get("error") == "Transaction is empty":
-            reasonString = "No pending transactions found"
-            break
-        elif resp_json.get("response") == "yes":
-            print("IA  M HERERERERE HAHAHSHHSAHSH")
-            execute_single_pending_safe_transaction(safeaddress, privateKey, chain_id_int)
-            reasonString += "Transaction(s) executed"
-        else:
-            reasonString += "Transaction is not safe to execute"
+            # 5) Check for "error" or "response" fields in resp_json
+            if "error" in resp_json and resp_json["error"] == "Transaction is empty":
+                reasonString = "No pending transactions found"
+                break
+            elif resp_json.get("response") == "yes":
+                print("Executing transaction...")
+                execute_single_pending_safe_transaction(safeaddress, privateKey, chain_id_int)
+                reasonString += "Transaction(s) executed"
+            else:
+                reasonString += "Transaction is not safe to execute"
+                break
+
+        except Exception as e:
+            reasonString = f"Error during execution: {str(e)}"
             break
 
     return jsonify({"response": reasonString})
@@ -622,6 +623,16 @@ def ask_ai_post():
 
     return jsonify({"response": response})
 
+@app.route("/propose_malicious_transaction/<path:safeaddress>/<path:address>/<path:chainId>/<path:delegatecallDestination>", methods=["GET"])
+def propose_malicious_transaction(safeaddress, address, chainId, delegatecallDestination):
+    wallet_response, status_code = get_or_create_wallet(address)
+    if status_code != 200:
+        return wallet_response, status_code
+    wallet_data = wallet_response.get_json()
+    privateKey = wallet_data["wallet"]["private_key"]
+    chainId_int = int(chainId)
+    return jsonify({"response": propose_delegatecall_tx(chainId_int, safeaddress, privateKey, delegatecallDestination)})
+
 @app.route("/ask_nilai/<path:question>", methods=["GET"])
 def ask_nilai_get(question):
     model = request.args.get("model", "ask_nilai")
@@ -631,8 +642,8 @@ def ask_nilai_get(question):
     response = asyncio.run(crypto_assistant.ask_ai(question, model))
     return jsonify({"response": response})
 
-@app.route("/api/v1/analyze_transaction/<path:safeaddress>", methods=["GET"])
-def analyze_transaction(safeaddress):
+@app.route("/api/v1/analyze_transaction/<path:safeaddress>/<path:chainId>", methods=["GET"])
+def analyze_transaction(safeaddress, chainId):
     # 1) Convert or replace any invalid surrogate characters
     #    so Python won't throw a 'surrogates not allowed' error.
 #    transaction_clean = transaction.encode("utf-8", errors="replace").decode("utf-8", errors="replace")
@@ -640,7 +651,7 @@ def analyze_transaction(safeaddress):
     # 2) Pick up the model choice from query param (defaults to "ask_nilai")
     model = request.args.get("model", "ask_openrouter")
 
-    transaction = get_lowest_pending_tx_info(safeaddress)
+    transaction = get_lowest_pending_tx_info(safeaddress, chainId)
     print(transaction)
     if not transaction:
         return jsonify({"error": "Transaction is empty"}), 400
@@ -657,13 +668,14 @@ def analyze_transaction(safeaddress):
     # 4) Call your async AI method, capturing the raw string response
     try:
         assistant_response = asyncio.run(crypto_assistant.ask_ai(question, model))
-        print(assistant_response,"assistant_response")
+   #     print(assistant_response,"assistant_response")
     except Exception as e:
         logging.error(f"Error in ask_ai: {e}")
         return jsonify({"error": "An error occurred while processing your question."}), 500
 
     lower_response = assistant_response.lower()
-    if "No" in lower_response :
+
+    if ("no" in lower_response or "not" in lower_response) and "know" not in lower_response:
         return jsonify({"response": "no"})
     else:
         return jsonify({"response": "yes"})
