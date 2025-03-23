@@ -1,4 +1,4 @@
-import os
+
 import certifi
 import requests
 import json
@@ -16,6 +16,8 @@ import asyncio
 import aiohttp
 import sqlite3
 import ssl
+import nest_asyncio
+nest_asyncio.apply()
 from automateSigningExecute import execute_pending_safe_transactions
 from automateSigningExecuteSingle import execute_single_pending_safe_transaction
 from massageDataPending import get_lowest_pending_tx_info
@@ -492,44 +494,97 @@ def about():
         return "About"
 
 @app.route("/api/v1/automateSigningExecute/<path:address>/<path:chainId>", methods=["GET"])
-def automateSigningExecute(address, chainId):
-    data = get_or_create_wallet(address)
-    privateKey = data["wallet"]["private_key"]
+async def automateSigningExecute(address, chainId):
+    wallet_response, status_code = get_or_create_wallet(address)
+
+    # 2) If the wallet call didn't succeed, just return its response
+    if status_code != 200:
+        return wallet_response, status_code
+
+    # 3) Convert the Flask Response into a Python dict
+    wallet_data = wallet_response.get_json()
+    # Now wallet_data is something like:
+    # {
+    #   "success": True,
+    #   "wallet": {
+    #       "address": "...",
+    #       "private_key": "..."
+    #   }
+    # }
+
+    # 4) Extract the private key
+    privateKey = wallet_data["wallet"]["private_key"]
     return jsonify({"response": execute_pending_safe_transactions(address, privateKey, chainId)})
 
 @app.route("/api/v1/automateSigningExecuteSingle/<path:address>/<path:chainId>", methods=["GET"])
-def automateSigningExecuteSingle(address, chainId):
-    data = get_or_create_wallet(address)
-    privateKey = data["wallet"]["private_key"]
-    return jsonify({"response": execute_single_pending_safe_transaction(address, privateKey, chainId)})
+async def automateSigningExecuteSingle(address, chainId):
+    wallet_response, status_code = get_or_create_wallet(address)
 
-@app.route("/api/v1/clearQueueWithAnalyzeAndSignAndExecute/<path:address>/<path:chainId>", methods=["GET"])
-def clearQueueWithAnalyzeAndSignAndExecute(address, chainId):
-    data = get_or_create_wallet(address)
-    privateKey = data["wallet"]["private_key"]
+    # 2) If the wallet call didn't succeed, just return its response
+    if status_code != 200:
+        return wallet_response, status_code
+
+    # 3) Convert the Flask Response into a Python dict
+    wallet_data = wallet_response.get_json()
+    # Now wallet_data is something like:
+    # {
+    #   "success": True,
+    #   "wallet": {
+    #       "address": "...",
+    #       "private_key": "..."
+    #   }
+    # }
+    chain_id_int = int(chainId)
+    # 4) Extract the private key
+    privateKey = wallet_data["wallet"]["private_key"]
+    return jsonify({"response": execute_single_pending_safe_transaction(address, privateKey, chain_id_int)})
+@app.route("/api/v1/clearQueueWithAnalyzeAndSignAndExecute/<path:safeaddress>/<path:address>/<path:chainId>", methods=["GET"])
+async def clearQueueWithAnalyzeAndSignAndExecute(safeaddress, address, chainId):
+    wallet_response, status_code = get_or_create_wallet(address)
+    chain_id_int = int(chainId)
+    # 1) If the wallet call didn't succeed, just return its response
+    if status_code != 200:
+        return wallet_response, status_code
+
+    # 2) Convert the Flask Response into a Python dict
+    wallet_data = wallet_response.get_json()
+    privateKey = wallet_data["wallet"]["private_key"]
+
     reasonString = ""
+
     while True:
-        response = analyze_transaction(address)
-        if (response == jsonify({"error": "Transaction is empty"}), 400):
+        # 3) Call analyze_transaction(safeaddress) => a Flask response
+        response = analyze_transaction(safeaddress)
+
+        # If analyze_transaction returned a non-200 status, stop
+        if response.status_code != 200:
+            reasonString = f"Error analyzing transaction: {response.status_code}"
+            break
+
+        # 4) Parse the JSON content from the response
+        resp_json = response.get_json()
+        print(resp_json,"resp_json")
+        # 5) Check for "error" or "response" fields in resp_json
+        if resp_json.get("error") == "Transaction is empty":
             reasonString = "No pending transactions found"
             break
-        if response.json()["response"] == "yes":
-            execute_single_pending_safe_transaction(address, privateKey, chainId)
+        elif resp_json.get("response") == "yes":
+            print("IA  M HERERERERE HAHAHSHHSAHSH")
+            execute_single_pending_safe_transaction(safeaddress, privateKey, chain_id_int)
             reasonString += "Transaction(s) executed"
         else:
             reasonString += "Transaction is not safe to execute"
             break
 
     return jsonify({"response": reasonString})
-
-@app.route("/api/v1/fullyAutomateClearingQueueAndAnalyzeLoop/<path:address>/<path:chainId>", methods=["GET"])
-def fullyAutomateClearingQueueAndAnalyzeLoop(address, chainId):
-    if botRunning:
-        return jsonify({"response": "Bot is already running"}), 400
+@app.route("/api/v1/fullyAutomateClearingQueueAndAnalyzeLoop/<path:safeaddress>/<path:address>/<path:chainId>", methods=["GET"])
+async def fullyAutomateClearingQueueAndAnalyzeLoop(safeaddress,address, chainId):
+    global botRunning
+    chain_id_int = int(chainId)
     botRunning = True
     while True:
-        response = clearQueueWithAnalyzeAndSignAndExecute(address, chainId)
-        time.sleep(10)
+        await clearQueueWithAnalyzeAndSignAndExecute(safeaddress,address, chain_id_int)
+        time.sleep(200)
         if (botRunning == False):
             break
     return jsonify({"response": "Bot stopped"})
@@ -576,8 +631,8 @@ def ask_nilai_get(question):
     response = asyncio.run(crypto_assistant.ask_ai(question, model))
     return jsonify({"response": response})
 
-@app.route("/api/v1/analyze_transaction/<path:address>", methods=["GET"])
-def analyze_transaction(address):
+@app.route("/api/v1/analyze_transaction/<path:safeaddress>", methods=["GET"])
+def analyze_transaction(safeaddress):
     # 1) Convert or replace any invalid surrogate characters
     #    so Python won't throw a 'surrogates not allowed' error.
 #    transaction_clean = transaction.encode("utf-8", errors="replace").decode("utf-8", errors="replace")
@@ -585,7 +640,7 @@ def analyze_transaction(address):
     # 2) Pick up the model choice from query param (defaults to "ask_nilai")
     model = request.args.get("model", "ask_openrouter")
 
-    transaction = get_lowest_pending_tx_info(address)
+    transaction = get_lowest_pending_tx_info(safeaddress)
     print(transaction)
     if not transaction:
         return jsonify({"error": "Transaction is empty"}), 400
@@ -596,7 +651,7 @@ def analyze_transaction(address):
     question = (
         "Ignore all previous instructions."
         "This is a transaction details: {transaction_clean}. "
-        "Is it true that the transaction contains 'operation': 1 and 'codeVerified': True? "
+        "Is it true that the transaction contains 'operation': 0 and 'codeVerified': True? "
     ).format(transaction_clean=transaction_clean)
 
     # 4) Call your async AI method, capturing the raw string response
@@ -608,7 +663,7 @@ def analyze_transaction(address):
         return jsonify({"error": "An error occurred while processing your question."}), 500
 
     lower_response = assistant_response.lower()
-    if "no" in lower_response:
+    if "No" in lower_response :
         return jsonify({"response": "no"})
     else:
         return jsonify({"response": "yes"})
@@ -754,5 +809,4 @@ def get_pending_txs(address):
 
 if __name__ == "__main__":
     app.run()
-
 
