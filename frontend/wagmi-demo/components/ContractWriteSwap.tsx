@@ -87,7 +87,7 @@ const ContractWriteSwap = ({
         const deadline = Math.floor(Date.now() / 1000) + 1200; // 20 minutes from now
         const amountIn = parseUnits(
             swapAmount,
-            tokenDecimals[finalFrom?.toLowerCase()] ?? 18
+            18
         );
         const WETH = "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2";
         const args = {
