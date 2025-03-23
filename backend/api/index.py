@@ -326,7 +326,7 @@ class CryptoTradingAssistant:
                     message += f"You've requested to swap: {tokenA} ({tokenA_address}) to {tokenB} ({tokenB_address}) on {chain}"
 
                 message += (
-                    "\n**⚠️ Please double-check details.**"
+                    "\n**⚠️ Please double-check details in wallet.**"
                 )
 
         # interaction_data = {"user": request, "assistant": message}

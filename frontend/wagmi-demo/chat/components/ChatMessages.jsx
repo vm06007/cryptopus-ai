@@ -15,6 +15,7 @@ import errorIcon from "../assets/images/error.svg";
 import Image from "next/image";
 import SendTransaction from "../../components/SendTransaction";
 import ContractWrite from "../../components/ContractWrite";
+import ContractWriteSwap from "../../components/ContractWriteSwap";
 
 function parseSwapInfo(originalText) {
     const regex = /SWAP_INFO:\s*(\{.*?\})(?:\r?\n)?/s;
@@ -184,7 +185,10 @@ function ChatMessages({ messages, isLoading, currentUser, currentSafe, chainId }
                                                     <ContractWrite
                                                         token={swapData.to_token}
                                                         to={swapData.to_token}
-                                                        amount={swapData.from_amount}
+                                                    <ContractWriteSwap
+                                                        swapAmount={swapData.from_amount}
+                                                        fromToken={swapData.from_token}
+                                                        toToken={swapData.to_token}
                                                     />
                                                 ) : sendInfo?.Amount ? (
                                                     isETH(sendInfo) ? (
