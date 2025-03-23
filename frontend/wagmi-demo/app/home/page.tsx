@@ -886,7 +886,6 @@ export default function Home() {
                                     <div className="">
                                         <Balance />
                                     </div>
-                                    <p>Assistant Balance: 💵</p>
                                     <p>Assistant Balance: 🏦</p>
                                     <div className="mb-2">
                                         <BalanceDynamic address={assistantAddress} />
