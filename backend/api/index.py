@@ -578,14 +578,18 @@ async def clearQueueWithAnalyzeAndSignAndExecute(safeaddress, address, chainId):
             break
 
     return jsonify({"response": reasonString})
+
 @app.route("/api/v1/fullyAutomateClearingQueueAndAnalyzeLoop/<path:safeaddress>/<path:address>/<path:chainId>", methods=["GET"])
 async def fullyAutomateClearingQueueAndAnalyzeLoop(safeaddress,address, chainId):
+    print("fullyAutomateClearingQueueAndAnalyzeLoop")
     global botRunning
     chain_id_int = int(chainId)
     botRunning = True
     while True:
-        await clearQueueWithAnalyzeAndSignAndExecute(safeaddress,address, chain_id_int)
-        time.sleep(200)
+        print("clearing queue")
+        await clearQueueWithAnalyzeAndSignAndExecute(safeaddress,address, chainId)
+        print("queue cleared2")
+        time.sleep(10)
         if (botRunning == False):
             break
     return jsonify({"response": "Bot stopped"})
