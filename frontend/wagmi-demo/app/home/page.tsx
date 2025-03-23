@@ -887,6 +887,7 @@ export default function Home() {
                                         <Balance />
                                     </div>
                                     <p>Assistant Balance: 💵</p>
+                                    <p>Assistant Balance: 🏦</p>
                                     <div className="mb-2">
                                         <BalanceDynamic address={assistantAddress} />
                                     </div>
@@ -915,7 +916,7 @@ export default function Home() {
                                                         tx
                                                     ) => {
                                                         // Format a message to examine/parse the transaction
-                                                        const message = `Explain and analyze this transaction including function selector be aware of different token decimals, normally its 18 decimal precision values:\n\`\`\`json\n${JSON.stringify(
+                                                        const message = `Explain and analyze this transaction including function selector be aware of different token decimals, ETH has 18 decimal precision values so 10000000000000000000 is 1 ETH and 5000000000000000 is 0.0005 ETH :\n\`\`\`json\n${JSON.stringify(
                                                             tx,
                                                             null,
                                                             2
