@@ -1,6 +1,10 @@
 import ReactMarkdown from "react-markdown";
 import remarkBreaks from "remark-breaks";
 import remarkGfm from "remark-gfm";
+import { useState } from "react";
+
+// from API
+import { sendPendingTransactionsToOctopusAI } from "../api";
 import Button from "../../components/Button";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { vs } from "react-syntax-highlighter/dist/esm/styles/prism";
@@ -65,7 +69,7 @@ function parseJsonCodeBlock(originalText) {
 }
 
 
-function ChatMessages({ messages, isLoading, currentUser, currentSafe }) {
+function ChatMessages({ messages, isLoading, currentUser, currentSafe, chainId }) {
     const scrollContentRef = useAutoScroll(isLoading);
 
     const isETH = (sendInfo) => {
@@ -93,11 +97,33 @@ function ChatMessages({ messages, isLoading, currentUser, currentSafe }) {
         }
     };
 
-    const handleExecutePending = () => {
-        console.log("Executing pending transaction...");
-        console.log("Current user:", currentUser);
-        console.log("Current Safe:", currentSafe);
+    const handleExecutePending = async () => {
+
+        if (buttonText === "Done") {
+            setButtonText("Invoke Safe Execution");
+            return;
+        }
+
+        setInProgress(true);
+        setButtonText("Executing Safe Transaction...");
+
+        const res = await sendPendingTransactionsToOctopusAI(
+            currentUser,
+            currentSafe,
+            chainId
+        );
+
+        setInProgress(false);
+        setButtonText("Done");
+        // console.log(currentUser, 'currentUser!!');
+        // console.log(currentSafe, 'currentSafe!!');
+        // console.log(chainId, 'chainId!!');
+        console.log(res, 'res!!');
     }
+
+    const [inProgress, setInProgress] = useState(false);
+    const [buttonText, setButtonText] = useState("Invoke Safe Execution");
+
 
     return (
         <div ref={scrollContentRef} className="grow space-y-4 overflow-no">
@@ -116,7 +142,7 @@ function ChatMessages({ messages, isLoading, currentUser, currentSafe }) {
                     const jsonResult = parseJsonCodeBlock(finalContent);
                     finalContent = jsonResult.text;
                     codeData = jsonResult.codeData;
-
+                    sendInfo = codeData;
                     // Now, finalContent is stripped of SWAP_INFO and any ```json code block.
                     // codeData holds the JSON object from the code fence if needed.
                 }
@@ -177,9 +203,13 @@ function ChatMessages({ messages, isLoading, currentUser, currentSafe }) {
                                                 {executePending && (
                                                     <>
                                                         <div className="text-primary-blue mt-2">
-                                                            <Button onClick_={() => {
-                                                                handleExecutePending();
-                                                            }} cta="Invoke Safe Execution" />
+                                                            <Button
+                                                                onClick_={() => {
+                                                                    handleExecutePending();
+                                                                }}
+                                                                cta={buttonText}
+                                                                disabled={inProgress}
+                                                            />
                                                         </div>
                                                     </>
                                                 )}
