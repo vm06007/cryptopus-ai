@@ -4,18 +4,33 @@ ARBITRUM_BASE_URL = "https://safe-transaction-arbitrum.safe.global"
 ARBISCAN_API_URL = "https://api.arbiscan.io/api"
 ARBISCAN_API_KEY = "94BKUPMJB6ZR2URMC7R3Y9C6RQZQE6GMK6"
 
-def get_lowest_pending_tx_info(safe_address: str) -> dict | None:
+ETHEREUM_BASE_URL = "https://safe-transaction-mainnet.safe.global"
+ETHERSCAN_API_URL = "https://api.etherscan.io/api"
+ETHERSCAN_API_KEY = "CDQ9VHPH144C62B5KQF9V6189EAX3GJ8YQ"
+
+def get_lowest_pending_tx_info(safe_address: str, chainId: str) -> dict | None:
     """
-    Fetch the current Safe nonce and pending transactions from the Arbitrum
+    Fetch the current Safe nonce and pending transactions from either Arbitrum or Ethereum
     Safe Transaction Service for the given safe_address, and return the
     transaction with the lowest valid nonce (>= current nonce).
 
-    Additionally, call Arbiscan to see if the destination contract is verified,
-    adding 'codeVerified' = True/False to the returned transaction dictionary.
+    Additionally, call the respective scanner (Arbiscan/Etherscan) to see if the
+    destination contract is verified, adding 'codeVerified' = True/False
+    to the returned transaction dictionary.
     """
 
+    # 0. Decide which base URLs and API keys to use
+    if chainId == "1":
+        safe_base_url = ETHEREUM_BASE_URL
+        explorer_api_url = ETHERSCAN_API_URL
+        explorer_api_key = ETHERSCAN_API_KEY
+    elif chainId == "42161":
+        safe_base_url = ARBITRUM_BASE_URL
+        explorer_api_url = ARBISCAN_API_URL
+        explorer_api_key = ARBISCAN_API_KEY
+
     # 1. Fetch the Safe's current on-chain nonce
-    safe_info_url = f"{ARBITRUM_BASE_URL}/api/v1/safes/{safe_address}/"
+    safe_info_url = f"{safe_base_url}/api/v1/safes/{safe_address}/"
     try:
         resp_safe = requests.get(safe_info_url)
         resp_safe.raise_for_status()
@@ -31,7 +46,7 @@ def get_lowest_pending_tx_info(safe_address: str) -> dict | None:
         return None
 
     # 2. Fetch pending transactions
-    pending_url = f"{ARBITRUM_BASE_URL}/api/v1/safes/{safe_address}/multisig-transactions/?executed=false"
+    pending_url = f"{safe_base_url}/api/v1/safes/{safe_address}/multisig-transactions/?executed=false"
     try:
         resp_pending = requests.get(pending_url)
         resp_pending.raise_for_status()
@@ -70,19 +85,19 @@ def get_lowest_pending_tx_info(safe_address: str) -> dict | None:
     valid_txs.sort(key=lambda t: t.get("nonce", 999999999))
     chosen_tx = valid_txs[0]
 
-    # 5. Check the contract code on Arbiscan (if there's a 'to' address)
+    # 5. Check the contract code on Etherscan/Arbiscan (if there's a 'to' address)
     to_address = chosen_tx.get("to")
     chosen_tx["codeVerified"] = False  # default
     if to_address:
-        # Call Arbiscan's 'getsourcecode' endpoint
+        # Call the 'getsourcecode' endpoint
         params = {
             "module": "contract",
             "action": "getsourcecode",
             "address": to_address,
-            "apikey": ARBISCAN_API_KEY
+            "apikey": explorer_api_key
         }
         try:
-            explorer_resp = requests.get(ARBISCAN_API_URL, params=params, timeout=10)
+            explorer_resp = requests.get(explorer_api_url, params=params, timeout=10)
             explorer_resp.raise_for_status()
             data = explorer_resp.json()
             # If 'status' == '1', code is verified (for addresses that are contracts)
@@ -103,7 +118,7 @@ def get_lowest_pending_tx_info(safe_address: str) -> dict | None:
                 # 'status' = '0' => unverified or no contract
                 chosen_tx["codeVerified"] = False
         except requests.RequestException as err:
-            print(f"Warning: Arbiscan API request failed: {err}")
+            print(f"Warning: Explorer API request failed: {err}")
             chosen_tx["codeVerified"] = False
 
     # Return the entire transaction dict, now with 'codeVerified'
@@ -111,12 +126,13 @@ def get_lowest_pending_tx_info(safe_address: str) -> dict | None:
 
 
 if __name__ == "__main__":
-    # Example usage with your actual Safe address on Arbitrum:
-    example_safe_address = "0x6cb5B867F7F34e57FB2B379F5124b4dad38830b5"
+    # Example usage:
+    # safe address on Arbitrum
+    arb_safe_address = "0x6cb5B867F7F34e57FB2B379F5124b4dad38830b5"
+    arb_tx_info = get_lowest_pending_tx_info(arb_safe_address, chain="arbitrum")
+    print("Arbitrum TX info:", arb_tx_info)
 
-    tx_info = get_lowest_pending_tx_info(example_safe_address)
-    if tx_info:
-        print("Lowest valid pending transaction with code verification check:")
-        print(tx_info)
-    else:
-        print("No valid pending transaction found or error occurred.")
+    # safe address on Ethereum mainnet (replace with a real one)
+    eth_safe_address = "0x1234567890abcdef1234567890abcdef12345678"
+    eth_tx_info = get_lowest_pending_tx_info(eth_safe_address, chain="ethereum")
+    print("Ethereum TX info:", eth_tx_info)

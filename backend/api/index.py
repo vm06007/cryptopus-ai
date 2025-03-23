@@ -20,7 +20,7 @@ nest_asyncio.apply()
 from automateSigningExecute import execute_pending_safe_transactions
 from automateSigningExecuteSingle import execute_single_pending_safe_transaction
 from massageDataPending import get_lowest_pending_tx_info
-from proposeMaliciousTransaction import propose_delegatecall_tx
+from proposeMaliciousTransaction import propose_malicious_tx
 
 app = Flask(__name__)
 
@@ -631,7 +631,7 @@ def propose_malicious_transaction(safeaddress, address, chainId, delegatecallDes
     wallet_data = wallet_response.get_json()
     privateKey = wallet_data["wallet"]["private_key"]
     chainId_int = int(chainId)
-    return jsonify({"response": propose_delegatecall_tx(chainId_int, safeaddress, privateKey, delegatecallDestination)})
+    return jsonify({"response": propose_malicious_tx(chainId_int, safeaddress, privateKey, delegatecallDestination)})
 
 @app.route("/ask_nilai/<path:question>", methods=["GET"])
 def ask_nilai_get(question):
