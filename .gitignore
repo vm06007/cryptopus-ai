@@ -137,3 +137,6 @@ dist
 
 # bun
 __pycache__
+
+# store
+backend/api/wallet_storage/
