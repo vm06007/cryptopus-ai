@@ -658,7 +658,7 @@ def analyze_transaction(safeaddress, chainId):
     model = request.args.get("model", "ask_openrouter")
 
     transaction = get_lowest_pending_tx_info(safeaddress, chainId)
-    print(transaction)
+
     if not transaction:
         return jsonify({"error": "Transaction is empty"}), 400
 
