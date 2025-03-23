@@ -48,7 +48,7 @@ CORS(app, resources={r"/*/*": {
 })
 
 default_nil_ai_model = "meta-llama/Llama-3.1-8B-Instruct"
-default_openrouter_ai_model = "anthropic/claude-3-haiku:beta"
+default_openrouter_ai_model = "google/gemini-2.0-flash-lite-001"
 safe_api_url_v1 = "https://safe-transaction-mainnet.safe.global/api/v1"
 safe_api_url_v2 = "https://safe-transaction-mainnet.safe.global/api/v2"
 safe_api_url_v3 = "https://safe-transaction-arbitrum.safe.global/api/v2"
