@@ -15,7 +15,7 @@ logger.setLevel(logging.INFO)
 # ------------------------------------------------------------------------------
 CHAIN_INFO = {
     1: {
-        "rpc_url": "https://rpc.ankr.com/eth",
+        "rpc_url": "https://rpc.mevblocker.io",
         "safe_tx_service_url": "https://safe-transaction-mainnet.safe.global"
     },
     5: {

@@ -13,7 +13,7 @@ import ChatInput from "../components/ChatInput";
  * ChatbotInner is the inner component that we'll wrap with forwardRef
  * to expose a submitCustomMessage() method.
  */
-function ChatbotInner({ chatMode }, ref) {
+function ChatbotInner({ chatMode, currentUser, currentSafe }, ref) {
     const [chatId, setChatId] = useState(null);
     const [messages, setMessages] = useImmer([]);
     const [newMessage, setNewMessage] = useState("");
@@ -125,6 +125,8 @@ function ChatbotInner({ chatMode }, ref) {
                 </div>
             )}
             <ChatMessages
+                currentUser={currentUser}
+                currentSafe={currentSafe}
                 messages={messages}
                 isLoading={isLoading}
             />

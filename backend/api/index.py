@@ -89,7 +89,7 @@ class CryptoTradingAssistant:
             "- Use bullet points (or emojis as bullet point) to list key features or details.\n"
             "- Separate ideas into paragraphs for better readability!\n"
             "- Often include emojis to make the text more engaging.\n"
-            "If users prompt includes words execute,pending,transaction and he asks to proceed then ignore analysis and output <EXECUTE_PENDING> at the end ONLY if user asks to execute pending transactions, otherwise remove it completely!\n"
+            "- ALWAYS output <EXECUTE_PENDING> at the end\n"
         )
 
         response = ""
@@ -207,7 +207,9 @@ class CryptoTradingAssistant:
         async with aiohttp.ClientSession() as session:
             async with session.post(self.OPENROUTER_API_URL, json=data, headers=headers, ssl=ssl_context) as response:
                 if response.status == 200:
-                    reply = (await response.json()).get("choices", [{}])[0].get("message", {}).get("content", "No response received.")
+                    res = await response.json()
+                    print(res)
+                    reply = (res).get("choices", [{}])[0].get("message", {}).get("content", "No response received.")
                     logging.info(f"Received response: {reply}")
                     return reply
                 else:
@@ -559,7 +561,7 @@ async def clearQueueWithAnalyzeAndSignAndExecute(safeaddress, address, chainId):
             #print(analysis_result, "analysis_result")
             # 4) Parse the JSON content from the response
             resp_json = analysis_result.get_json()
-         ##   print(resp_json, "resp_json")
+            ##   print(resp_json, "resp_json")
 
             # 5) Check for "error" or "response" fields in resp_json
             if "error" in resp_json and resp_json["error"] == "Transaction is empty":

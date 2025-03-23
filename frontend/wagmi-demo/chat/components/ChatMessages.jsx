@@ -65,7 +65,7 @@ function parseJsonCodeBlock(originalText) {
 }
 
 
-function ChatMessages({ messages, isLoading }) {
+function ChatMessages({ messages, isLoading, currentUser, currentSafe }) {
     const scrollContentRef = useAutoScroll(isLoading);
 
     const isETH = (sendInfo) => {
@@ -92,6 +92,12 @@ function ChatMessages({ messages, isLoading }) {
             );
         }
     };
+
+    const handleExecutePending = () => {
+        console.log("Executing pending transaction...");
+        console.log("Current user:", currentUser);
+        console.log("Current Safe:", currentSafe);
+    }
 
     return (
         <div ref={scrollContentRef} className="grow space-y-4 overflow-no">
@@ -172,7 +178,7 @@ function ChatMessages({ messages, isLoading }) {
                                                     <>
                                                         <div className="text-primary-blue mt-2">
                                                             <Button onClick_={() => {
-                                                                console.log("Executing pending transactions...");
+                                                                handleExecutePending();
                                                             }} cta="Invoke Safe Execution" />
                                                         </div>
                                                     </>

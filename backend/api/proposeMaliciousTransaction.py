@@ -9,7 +9,7 @@ from eth_utils import to_bytes
 SAFE_TX_SERVICE = {
     1: {
         "serviceUrl": "https://safe-transaction-mainnet.safe.global",
-        "rpcUrl": "https://rpc.ankr.com/eth"
+        "rpcUrl": "https://rpc.mevblocker.io"
     },
     42161: {
         "serviceUrl": "https://safe-transaction-arbitrum.safe.global",
