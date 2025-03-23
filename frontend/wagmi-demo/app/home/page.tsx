@@ -729,7 +729,41 @@ export default function Home() {
                                     </div>
                                 </>
                             )}
-
+                            {address && currentMode === "trade" && (
+                                <div>
+                                    <h2 className="text-xl font-bold mb-2 mt-5">Trade Mode</h2>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-4">
+                                        <div className="p-4 border rounded-lg shadow-md bg-white">
+                                            <div className="flex items-center justify-between">
+                                                <span className="font-bold text-lg">USDC</span>
+                                                <span className="text-green-600">$1.00</span>
+                                            </div>
+                                            <p className="text-sm text-gray-500">Stablecoin</p>
+                                        </div>
+                                        <div className="p-4 border rounded-lg shadow-md bg-white">
+                                            <div className="flex items-center justify-between">
+                                                <span className="font-bold text-lg">USDT</span>
+                                                <span className="text-green-600">$1.00</span>
+                                            </div>
+                                            <p className="text-sm text-gray-500">Stablecoin</p>
+                                        </div>
+                                        <div className="p-4 border rounded-lg shadow-md bg-white">
+                                            <div className="flex items-center justify-between">
+                                                <span className="font-bold text-lg">Verse</span>
+                                                <span className="text-green-600">$0.003</span>
+                                            </div>
+                                            <p className="text-sm text-gray-500">Bitcoin.com</p>
+                                        </div>
+                                        <div className="p-4 border rounded-lg shadow-md bg-white">
+                                            <div className="flex items-center justify-between">
+                                                <span className="font-bold text-lg">WISE</span>
+                                                <span className="text-green-600">$0.12</span>
+                                            </div>
+                                            <p className="text-sm text-gray-500">WISE Lending</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
                             {/* SAFE WALLETS LIST */}
                             {address && currentMode === "safe" && (
                                 <SafeWalletsList
