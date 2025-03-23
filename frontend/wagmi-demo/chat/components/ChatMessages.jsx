@@ -182,9 +182,6 @@ function ChatMessages({ messages, isLoading, currentUser, currentSafe, chainId }
                                         {!loading && (
                                             <>
                                                 {swapData ? (
-                                                    <ContractWrite
-                                                        token={swapData.to_token}
-                                                        to={swapData.to_token}
                                                     <ContractWriteSwap
                                                         swapAmount={swapData.from_amount}
                                                         fromToken={swapData.from_token}
