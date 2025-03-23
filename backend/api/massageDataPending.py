@@ -124,15 +124,3 @@ def get_lowest_pending_tx_info(safe_address: str, chainId: str) -> dict | None:
     # Return the entire transaction dict, now with 'codeVerified'
     return chosen_tx
 
-
-if __name__ == "__main__":
-    # Example usage:
-    # safe address on Arbitrum
-    arb_safe_address = "0x6cb5B867F7F34e57FB2B379F5124b4dad38830b5"
-    arb_tx_info = get_lowest_pending_tx_info(arb_safe_address, chain="arbitrum")
-    print("Arbitrum TX info:", arb_tx_info)
-
-    # safe address on Ethereum mainnet (replace with a real one)
-    eth_safe_address = "0x1234567890abcdef1234567890abcdef12345678"
-    eth_tx_info = get_lowest_pending_tx_info(eth_safe_address, chain="ethereum")
-    print("Ethereum TX info:", eth_tx_info)
