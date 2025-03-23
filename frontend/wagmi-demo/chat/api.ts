@@ -66,7 +66,7 @@ export async function sendChatMessage(chatId: number, message: string, mode: str
     if (!mode) {
         mode = "ask_ai";
     }
-    const resReal = await fetch(`http://localhost:5000/${mode}`, {
+    const resReal = await fetch(`{BASE_URL}/${mode}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
