@@ -1,4 +1,5 @@
-const BASE_URL = "http://localhost:5000";
+const BASE_URL = "https://api.wise.one"; // use production
+// const BASE_URL = "http://localhost:5000"; // use locally <---
 const VERSION = "v1";
 
 export async function createChat() {
