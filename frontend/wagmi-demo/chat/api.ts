@@ -11,8 +11,6 @@ export async function createChat() {
 
     const dataReal = await resReal.json();
 
-    console.log(dataReal);
-
     const data = {
         id: dataReal.chatId
     }
@@ -34,13 +32,12 @@ function extractSendInfo(text: string) {
 
     let sendInfo = null;
     let modifiedText = text;
-
     // Extract SEND_INFO JSON and remove it from the text
     const sendInfoMatch = modifiedText.match(sendInfoRegex);
     if (sendInfoMatch && sendInfoMatch[1]) {
         try {
             sendInfo = JSON.parse(sendInfoMatch[1]);
-            modifiedText = modifiedText.replace(sendInfoRegex, '').trim();
+            modifiedText = modifiedText.replace(sendInfoRegex, "").trim();
         } catch (error) {
             console.error("Error parsing JSON:", error);
         }
@@ -51,7 +48,7 @@ function extractSendInfo(text: string) {
     if (executePendingRegex.test(modifiedText)) {
         executePending = true;
         console.log("Detected <EXECUTE_PENDING> flag");
-        modifiedText = modifiedText.replace(executePendingRegex, '').trim();
+        modifiedText = modifiedText.replace(executePendingRegex, "").trim();
     }
 
     return {
