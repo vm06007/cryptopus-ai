@@ -51,7 +51,7 @@ let output = {};
     let rpcUrl = null;
     if (chainIdNum === 1) {
       // Ethereum mainnet
-      rpcUrl = 'https://cloudflare-eth.com';
+      rpcUrl = 'https://rpc.mevblocker.io';
     } else if (chainIdNum === 5) {
       // Goerli
       rpcUrl = 'https://rpc.ankr.com/eth_goerli';
@@ -61,7 +61,7 @@ let output = {};
     } else {
       // Fallback - user must provide an RPC if needed
       console.warn(`[WARN] No built-in RPC for chainId=${chainIdNum}. ` +
-                   `If TX_SERVICE_URL was provided, we might still proceed, but signing may fail without a valid provider.`);
+        `If TX_SERVICE_URL was provided, we might still proceed, but signing may fail without a valid provider.`);
     }
     console.log(`[DEBUG] Using RPC URL: ${rpcUrl}`);
 
