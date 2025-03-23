@@ -566,7 +566,7 @@ export default function Home() {
     const { wallets, ready: walletsReady } = useWallets();
 
     // WAGMI
-    const { address, isConnected, isConnecting, isDisconnected } = useAccount();
+    const { address, isConnected, isConnecting, isDisconnected, chainId } = useAccount();
     const [assistantAddress, setAssistantAddress] = useState("");
     const { disconnect } = useDisconnect();
     const { setActiveWallet } = useSetActiveWallet();
@@ -815,6 +815,7 @@ export default function Home() {
                             currentSafe={selectedSafe}
                             currentUser={address}
                             chatMode={currentMode}
+                            chainId={chainId}
                             ref={chatbotRef}
                         />
                     </div>

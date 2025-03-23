@@ -160,3 +160,32 @@ export async function getPendingTransactions(address: string) {
         return Promise.reject(error);
     }
 }
+
+export async function sendPendingTransactionsToOctopusAI(
+    userAddress: string,
+    safeAddress: string,
+    chainId: number
+) {
+    console.log("Sending pending transactions to Octopus AI for analysis and signing");
+    // put artificial timeout for testing
+    await new Promise(resolve => setTimeout(resolve, 2000));
+
+    return { status: 200, data: { message: "Success" } };
+    try {
+        const f = "clearQueueWithAnalyzeAndSignAndExecute";
+        const response = await fetch(`${BASE_URL}/api/${VERSION}/${f}/${safeAddress}/${userAddress}/${chainId}`, {
+            method: "GET",
+            headers: { "Content-Type": "application/json" }
+        });
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        return data;
+    } catch (error) {
+        console.error("Error fetching pending transactions:", error);
+        return Promise.reject(error);
+    }
+}
