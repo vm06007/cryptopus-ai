@@ -556,10 +556,10 @@ async def clearQueueWithAnalyzeAndSignAndExecute(safeaddress, address, chainId):
         try:
             # 3) Call analyze_transaction(safeaddress) and get its response directly
             analysis_result = analyze_transaction(safeaddress, chainId)
-
+            #print(analysis_result, "analysis_result")
             # 4) Parse the JSON content from the response
             resp_json = analysis_result.get_json()
-            print(resp_json, "resp_json")
+         ##   print(resp_json, "resp_json")
 
             # 5) Check for "error" or "response" fields in resp_json
             if "error" in resp_json and resp_json["error"] == "Transaction is empty":
@@ -668,7 +668,7 @@ def analyze_transaction(safeaddress, chainId):
     # 4) Call your async AI method, capturing the raw string response
     try:
         assistant_response = asyncio.run(crypto_assistant.ask_ai(question, model))
-   #     print(assistant_response,"assistant_response")
+        print(assistant_response,"assistant_response")
     except Exception as e:
         logging.error(f"Error in ask_ai: {e}")
         return jsonify({"error": "An error occurred while processing your question."}), 500
